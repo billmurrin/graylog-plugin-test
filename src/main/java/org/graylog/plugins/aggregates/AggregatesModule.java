@@ -21,7 +21,6 @@ import org.graylog2.alerts.types.FieldContentValueAlertCondition;
 import org.graylog2.plugin.PluginConfigBean;
 import org.graylog2.plugin.PluginModule;
 import org.graylog2.plugin.alarms.AlertCondition;
-
 import java.util.Collections;
 import java.util.Set;
 
@@ -53,8 +52,9 @@ public class AggregatesModule extends PluginModule {
         addPermissions(ReportScheduleRestPermissions.class);
         addRestResource(RuleResource.class);
         addRestResource(ReportScheduleResource.class);
+        //addRestResource(TestRest.class);
 
-        addAlertCondition(AggregatesUtil.ALERT_CONDITION_TYPE, AggregatesAlertCondition.class, AggregatesAlertCondition.Factory.class);
+        //addAlertCondition(AggregatesUtil.ALERT_CONDITION_TYPE, AggregatesAlertCondition.class, AggregatesAlertCondition.Factory.class);
 
         /*
          * Register your plugin types here.

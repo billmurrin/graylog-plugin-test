@@ -52,7 +52,7 @@ public class RuleResource extends RestResource implements PluginRestResource {
     @RequiresAuthentication
     @RequiresPermissions(RuleRestPermissions.AGGREGATE_RULES_READ)
     public RulesList list() {
-        final List<Rule> rules = ruleService.all();   
+        final List<Rule> rules = ruleService.all();
         return RulesList.create(rules);
     }
     

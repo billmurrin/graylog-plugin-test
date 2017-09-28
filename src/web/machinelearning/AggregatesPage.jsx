@@ -18,9 +18,9 @@ const AggregatesPage = React.createClass({
   render() {
     return (
       <span>
-        <PageHeader title="Aggregate Rules">
+        <PageHeader title="Machine learning">
           <span>
-            With aggregate rules, you can define a rule with criteria for a terms search, so you can generate an alert when the same value for field X occurs Y times in a Z minute time frame.
+            please define Machine learning here  
           </span>
 
           <span>
@@ -37,7 +37,7 @@ const AggregatesPage = React.createClass({
           </span>
         </PageHeader>
 
-        
+
         <Row className="content">
           <Col md={12}>
             <IfPermitted permissions={['aggregate_rules:read', 'aggregate_report_schedules:read']}>

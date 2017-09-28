@@ -16,9 +16,15 @@
   "author": "Christiaan van Tienhoven <c_van_tienhoven@hotmail.com>",
   "license": "MIT",
   "dependencies": {
-    "graylog-web-plugin": "file:../graylog2-server/graylog2-web-interface/packages/graylog-web-plugin"
+    "chart.js": "^1.1.1",
+    "graylog-web-plugin": "file:../smartthink2-server/graylog2-web-interface/packages/graylog-web-plugin",
+    "react": "^15.6.2",
+    "react-chartjs": "^0.8.0",
+    "react-dom": "^15.6.2",
+    "react-simple-datepicker": "^0.1.4",
+    "serialize": "^0.1.3"
   },
   "devDependencies": {
-    "graylog-web-plugin": "file:../graylog2-server/graylog2-web-interface/packages/graylog-web-plugin"
+    "graylog-web-plugin": "file:../smartthink2-server/graylog2-web-interface/packages/graylog-web-plugin"
   }
 }

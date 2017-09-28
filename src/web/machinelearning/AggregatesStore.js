@@ -14,6 +14,7 @@ const AggregatesStore = Reflux.createStore({
   },
 
   list() {
+    console.log(this.sourceUrl);
     const promise = fetch('GET', URLUtils.qualifyUrl(this.sourceUrl))
       .then(
         response => {
