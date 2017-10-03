@@ -7,6 +7,8 @@ import org.graylog.plugins.aggregates.maintenance.AggregatesMaintenance;
 import org.graylog.plugins.aggregates.permissions.RuleRestPermissions;
 import org.graylog.plugins.aggregates.permissions.ReportScheduleRestPermissions;
 import org.graylog.plugins.aggregates.report.AggregatesReport;
+import org.graylog.plugins.aggregates.rule.JobService;
+import org.graylog.plugins.aggregates.rule.JobServiceImpl;
 import org.graylog.plugins.aggregates.rule.RuleService;
 import org.graylog.plugins.aggregates.rule.RuleServiceImpl;
 import org.graylog.plugins.aggregates.rule.rest.RuleResource;
@@ -40,18 +42,23 @@ public class AggregatesModule extends PluginModule {
 
     @Override
     protected void configure() {
-        bind(AlertService.class).to(AlertServiceImpl.class);
+//        bind(AlertService.class).to(AlertServiceImpl.class);
     	bind(RuleService.class).to(RuleServiceImpl.class);
-    	bind(ReportScheduleService.class).to(ReportScheduleServiceImpl.class);
-    	bind(HistoryItemService.class).to(HistoryItemServiceImpl.class);    	    	    	
+        bind(JobService.class).to(JobServiceImpl.class);
+
+
+//    	bind(ReportScheduleService.class).to(ReportScheduleServiceImpl.class);
+
+
+//    	bind(HistoryItemService.class).to(HistoryItemServiceImpl.class);
     	
-        addPeriodical(Aggregates.class);
-        addPeriodical(AggregatesReport.class);
-        addPeriodical(AggregatesMaintenance.class);
-        addPermissions(RuleRestPermissions.class);
-        addPermissions(ReportScheduleRestPermissions.class);
+//        addPeriodical(Aggregates.class);
+//        addPeriodical(AggregatesReport.class);
+//        addPeriodical(AggregatesMaintenance.class);
+//        addPermissions(RuleRestPermissions.class);
+//        addPermissions(ReportScheduleRestPermissions.class);
         addRestResource(RuleResource.class);
-        addRestResource(ReportScheduleResource.class);
+//        addRestResource(ReportScheduleResource.class);
         //addRestResource(TestRest.class);
 
         //addAlertCondition(AggregatesUtil.ALERT_CONDITION_TYPE, AggregatesAlertCondition.class, AggregatesAlertCondition.Factory.class);

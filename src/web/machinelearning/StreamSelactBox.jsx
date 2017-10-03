@@ -116,14 +116,28 @@ const StreamSelactBox = React.createClass({
     console.log(this.state.streamName);
     console.log(this.state.rawData);
     var res = {
-      startDate: start,
-      endDate: end,
-      field: field,
-      aggrigationType: value,
-      streamName: this.state.streamName,
-      rawData: this.state.rawData
+      job: {
+        query: "start",
+        field: "field",
+      }
+
     }
+    // var res = {
+    //   startDate: start,
+    //   endDate: end,
+    //   field: field,
+    //   aggrigationType: value,
+    //   streamName: this.state.streamName,
+    //   rawData: this.state.rawData
+    // }
     console.log(res);
+    const failCallback = (errorThrown) => {
+      console.log("errorThrown", errorThrown)
+    };
+    var callback = function(k) {
+      console.log(k);
+    }
+    fetch('PUT', "http://localhost:9000/api/plugins/org.graylog.plugins.aggregates/rules", res).then(callback, failCallback);
 
   },
 

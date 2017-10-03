@@ -10,8 +10,11 @@ import io.swagger.annotations.ApiResponses;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.graylog.plugins.aggregates.permissions.RuleRestPermissions;
+import org.graylog.plugins.aggregates.rule.Job;
+import org.graylog.plugins.aggregates.rule.JobService;
 import org.graylog.plugins.aggregates.rule.Rule;
 import org.graylog.plugins.aggregates.rule.RuleService;
+import org.graylog.plugins.aggregates.rule.rest.models.requests.AddJobRequest;
 import org.graylog.plugins.aggregates.rule.rest.models.requests.AddRuleRequest;
 import org.graylog.plugins.aggregates.rule.rest.models.requests.UpdateRuleRequest;
 import org.graylog.plugins.aggregates.rule.rest.models.responses.RulesList;
@@ -39,11 +42,15 @@ import java.util.List;
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public class RuleResource extends RestResource implements PluginRestResource {
-    private final RuleService ruleService;  
-    
+    private final RuleService ruleService;
+    private final JobService jobService;
+
     @Inject
-    public RuleResource(RuleService ruleService) {
+    public RuleResource(RuleService ruleService, JobService jobService) {
+
         this.ruleService = ruleService;
+        this.jobService = jobService;
+
     }
 
     @GET
@@ -55,23 +62,28 @@ public class RuleResource extends RestResource implements PluginRestResource {
         final List<Rule> rules = ruleService.all();
         return RulesList.create(rules);
     }
-    
+
     @PUT
-    @Timed    
+    @Timed
     @ApiOperation(value = "Create a rule")
     @RequiresAuthentication
-    @RequiresPermissions(RuleRestPermissions.AGGREGATE_RULES_CREATE)
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "The supplied request is not valid.")
     })
-    public Response create(
-                             @ApiParam(name = "JSON body", required = true) @Valid @NotNull AddRuleRequest request
-                             ) {
-        final Rule rule = ruleService.fromRequest(request);
+    public void create(
+            @ApiParam(name = "JSON body", required = true) @Valid @NotNull AddJobRequest request
+    ) {
 
-        ruleService.create(rule);
+        System.out.println(request.toString());
+        final Job job = jobService.fromRequest(request);
 
-        return Response.accepted().build();
+            jobService.create(job);
+            System.out.println("request"+ job);
+
+//        final Rule rule = ruleService.fromRequest(request);
+
+//        ruleService.create(rule);
+//        return Response.accepted().build();
     }
 
     @POST
@@ -84,16 +96,16 @@ public class RuleResource extends RestResource implements PluginRestResource {
             @ApiResponse(code = 400, message = "The supplied request is not valid.")
     })
     public Response update(@ApiParam(name = "name", required = true)
-    					   @PathParam("name") String name,
-                             @ApiParam(name = "JSON body", required = true) @Valid @NotNull UpdateRuleRequest request
-                             ) throws UnsupportedEncodingException {
+                           @PathParam("name") String name,
+                           @ApiParam(name = "JSON body", required = true) @Valid @NotNull UpdateRuleRequest request
+    ) throws UnsupportedEncodingException {
         final Rule rule = ruleService.fromRequest(request);
 
         ruleService.update(java.net.URLDecoder.decode(name, "UTF-8"), rule);
 
         return Response.accepted().build();
     }
-    
+
     @DELETE
     @Path("/{name}")
     @RequiresAuthentication
@@ -104,8 +116,8 @@ public class RuleResource extends RestResource implements PluginRestResource {
             @ApiResponse(code = 400, message = "Invalid ObjectId.")
     })
     public void delete(@ApiParam(name = "name", required = true)
-                              @PathParam("name") String name
-                              ) throws NotFoundException, MongoException, UnsupportedEncodingException {
+                       @PathParam("name") String name
+    ) throws NotFoundException, MongoException, UnsupportedEncodingException {
         ruleService.destroy(java.net.URLDecoder.decode(name, "UTF-8"));
     }
 }

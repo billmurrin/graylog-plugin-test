@@ -113,7 +113,7 @@ public abstract class RuleImpl implements Rule{
                                        @JsonProperty("repeatNotifications") boolean repeatNotifications) {
         return new AutoValue_RuleImpl(query, field, alertReceivers, numberOfMatches, matchMoreOrEqual, interval, name, enabled, streamId, inReport, reportSchedules, sliding, currentAlertId, repeatNotifications);
     }
-	
+
 	public static RuleImpl create(
             String query,
             String field,
@@ -130,6 +130,6 @@ public abstract class RuleImpl implements Rule{
             String currentAlertId,
             boolean repeatNotifications) {
 		return new AutoValue_RuleImpl(query, field, alertReceivers, numberOfMatches, matchMoreOrEqual, interval, name, enabled, streamId, inReport, reportSchedules, sliding, currentAlertId, repeatNotifications);
-	
+
 	}
 }
