@@ -105,14 +105,33 @@ const StreamSelactBox = React.createClass({
     console.log(this.state);
   },
   onEndSelected(date) {
+    console.log("on end select");
     this.setState({endDate: new Date(date)})
+  },
+  handelSaveSubmit(evt) {
+    var start = $(".start-date").val();
+    var end = $(".end-date").val();
+    var field = $("#fields").val();
+    var value = $("#aggrigationType").val();
+    console.log(this.state.streamName);
+    console.log(this.state.rawData);
+    var res = {
+      startDate: start,
+      endDate: end,
+      field: field,
+      aggrigationType: value,
+      streamName: this.state.streamName,
+      rawData: this.state.rawData
+    }
+    console.log(res);
+
   },
 
   handelSubmit(evt) {
 
     let tmpl = this;
-    var start = $(".start-date").value;
-    var end = $(".end-date").value;
+    var start = $(".start-date").val();
+    var end = $(".end-date").val();
     var value = $("#fields").val();
     client.search({
       index: 'server-metrics',
@@ -160,62 +179,16 @@ const StreamSelactBox = React.createClass({
 
           ]
         }}
-        resp.aggregations["bucket_time"].buckets.map(function(b) {
+        resp.aggregations.bucket_time.buckets.map(function(b) {
           d.chartData.labels.push(new Date(b.key_as_string))
           d.chartData.datasets[0].data.push(b.server_stats.value)
         })
-        console.log(d);
+        tmpl.setState({rawData:resp.aggregations.bucket_time.buckets});
         tmpl.setState({chartData:d.chartData})
         tmpl.setState({showLine:true})
       }, function (err) {
         console.trace(err.message);
       });
-
-
-      // let tmpl = th date={this.state.startDate} is;
-      // var d =    {
-      //   chartData: {
-      //     labels: [],
-      //     datasets: [
-      //         {
-      //             fillColor: "#25BDFF",
-      //             strokeColor: "#25BDFF",
-      //             pointColor: "#25BDFF",
-      //             pointStrokeColor: "#fff",
-      //             pointHighlightFill: "#fff",
-      //             pointHighlightStroke: "#25BDFF",
-      //             data: []
-      //         }
-      //
-      //     ]
-      //   }}
-      // var data = [];
-      // var data1 = {};
-      // const fb = (errorThrown) => {
-      //   console.log("errorThrown", errorThrown)
-      // };
-      // var cb = function(res) {
-      //   console.log(res);
-      //   res.messages.map(function(k) {
-      //     var date = new Date(k.message.closedTime)
-      //     var fd = date.getDate()+"/"+date.getMonth()+"/"+date.getFullYear()
-      //     if(!data1[fd]) data1[fd] = k.message[tmpl.state.fieldName];
-      //     else {ControlLabel
-      //       data1[fd] = (data1[fd] +k.message[tmpl.state.fieldName]) /2;
-      //     }
-      //   })
-      //   for (var k in data1) {
-      //     if (data1.hasOwnProperty(k)) {
-      //       d.chartData.labels.push(k)
-      //       d.chartData.datasets[0].data.push(data1[k])
-      //     }
-      //
-      //   }
-      //   tmpl.setState({chartData:d.chartData})
-      //   tmpl.setState({showLine:true})
-      // }
-      // var url = "http://localhost:9000/api/search/universal/relative?query=*&range=0&limit=1000&sort=timestamp:desc";
-      // fetch('GET', url).then(cb, fb);
     },
     render(){
       let chart = null;
@@ -228,14 +201,14 @@ const StreamSelactBox = React.createClass({
         <Row className="content">
 
         <Col md={2}>
-          <DatePicker inputClassName="start-date" date={new Date()} />
+          <DatePicker onChange={this.onStartSelected} inputClassName="start-date" date={new Date()} />
         </Col>
         <Col md={2}>
-          <DatePicker  inputClassName="end-date" date={new Date()}  />
+          <DatePicker onChange={this.onEndSelected}   inputClassName="end-date" date={new Date()}  />
         </Col>
         <Col md={2}>
         <ControlLabel>select aggrigation type</ControlLabel>
-        <FormControl onChange={this.handelAggrigationChange} componentClass="select" id="streamName">
+        <FormControl onChange={this.handelAggrigationChange} componentClass="select" id="aggrigationType">
         {this.state.typeOPs}
         </FormControl>
         </Col>
@@ -253,6 +226,7 @@ const StreamSelactBox = React.createClass({
         </Col>
         <Col md={1}>
         <Button onClick={this.handelSubmit}> go </Button>
+        <Button onClick={this.handelSaveSubmit}> save </Button>
         </Col>
         </Row>
         <Row className="content">
