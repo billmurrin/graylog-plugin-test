@@ -1,5 +1,6 @@
 import React from 'react';
 import serialize from 'form-serialize';
+import randomId from 'random-id';
 import {FormGroup, ControlLabel, FormControl} from 'react-bootstrap';
 import fetch from 'logic/rest/FetchProvider';
 import { Row, Col, Button } from 'react-bootstrap';
@@ -7,8 +8,13 @@ import $ from 'jquery';
 import elasticsearch from 'elasticsearch';
 import { Line } from "react-chartjs";
 import { Input } from 'components/bootstrap';
+import { TextField } from 'components/configurationforms';
 import DatePicker from 'react-simple-datepicker';
-import 'react-simple-datepicker/dist/index.css';
+
+import moment from 'moment';
+
+import {Form, Field} from 'simple-react-form'
+
 var client = new elasticsearch.Client({
   host: 'localhost:9200',
   log: 'trace',
@@ -28,12 +34,34 @@ var aggs = [
   {code: 'mean', value: "Mean"},
   {code: 'count', value: "Count"},
 ]
+var buckets = [
+  {code: '5m', value: "5m"},
+  {code: '10m', value: "10m"},
+  {code: '20m', value: "20m"},
+  {code: '30m', value: "30m"},
+  {code: '40m', value: "40m"},
+  {code: '50m', value: "50m"},
+  {code: '60m', value: "60m"},
+  {code: '70m', value: "70m"},
+  {code: '80m', value: "80m"},
+  {code: '5h', value: "5h"},
+  {code: '10h', value: "10h"},
+  {code: '20h', value: "20h"},
+  {code: '30h', value: "30h"},
+
+]
+var buck = []
+buckets.map(function(k) {
+  buck.push(<option key={k.code} value={k.code}> {k.value} </option>);
+})
 const StreamSelactBox = React.createClass({
   getInitialState: function() {
     return {
       opts:[],
       optsFields:[],
+      optsBuckets:[],
       chartData: {},
+      job: {}
     };
   },
 
@@ -61,8 +89,20 @@ const StreamSelactBox = React.createClass({
     }
     fetch('GET', "http://localhost:9000/api/streams/").then(callback, failCallback);
   },
+  handelBucketsChange(evt){
+    this.setState({bucket: evt.currentTarget.value});
+  },
   handelStreamChange(evt){
-    this.setState({streamName: evt.currentTarget.value})
+    const job = this.state.job;
+
+    const parameter = evt.target.name;
+    const value = evt.target.type === 'checkbox' ? evt.target.checked : evt.target.value;
+    console.log(parameter);
+    console.log(value);
+    job[parameter] =value;
+    this.setState({ job: job });
+    // this.setState({streamName: evt.currentTarget.value})
+    console.log(this.state);
     let tmpl = this;
     const fb = (errorThrown) => {
       console.log("errorThrown", errorThrown)
@@ -80,8 +120,8 @@ const StreamSelactBox = React.createClass({
       });
     }
 
-    var streamId = evt.currentTarget.value;
-    //  fetch('GET', "http://localhost:9000/api/search/universal/relative?query=*&filter=streams:"+streamId).then(cb, fb)
+    var streamName = evt.currentTarget.value;
+    //  fetch('GET', "http://localhost:9000/api/search/universal/relative?query=*&filter=streams:"+streamName).then(cb, fb)
 
     client.indices.getMapping({index: 'server-metrics'}, function(error, response) {
       if (error) {
@@ -109,44 +149,47 @@ const StreamSelactBox = React.createClass({
     this.setState({endDate: new Date(date)})
   },
   handelSaveSubmit(evt) {
-    var start = $(".start-date").val();
-    var end = $(".end-date").val();
-    var field = $("#fields").val();
-    var value = $("#aggrigationType").val();
-    console.log(this.state.streamName);
-    console.log(this.state.rawData);
-    var res = {
-      job: {
-        query: "start",
-        field: "field",
-      }
-
-    }
-    // var res = {
-    //   startDate: start,
-    //   endDate: end,
-    //   field: field,
-    //   aggrigationType: value,
-    //   streamName: this.state.streamName,
-    //   rawData: this.state.rawData
-    // }
-    console.log(res);
+    let tmpl = this;
     const failCallback = (errorThrown) => {
       console.log("errorThrown", errorThrown)
     };
+    var data = this.state.rawData.map(function(k) {
+      return {'key': new Date(k.key_as_string), 'value': k.server_stats.value, 'jobId': tmpl.state.job.jobid }
+    })
     var callback = function(k) {
-      console.log(k);
+        data.map(function(d, index) {
+            client.create({ index: 'ml.anomalydetection', type: '2017', id : randomId(), body: d},function(err,results) {
+          })
+        })
+        tmpl.props.handler({showCreateJob: true})
     }
-    fetch('PUT', "http://localhost:9000/api/plugins/org.graylog.plugins.aggregates/rules", res).then(callback, failCallback);
+    fetch('PUT', "http://localhost:9000/api/plugins/org.graylog.plugins.aggregates/rules", {job: this.state.job}).then(callback, failCallback);
 
   },
+  _createStreamSelectItems(){
+    const items = [];
+    for (let i = 0; i < this.state.opts.length; i++) {
+      items.push(<option key={i} value={this.state.streams[i].id}>{this.state.streams[i].title}</option>);
+    }
+    return items;
+  },
 
+  _onValueChanged(event) {
+    const job = this.state.job;
+    const parameter = event.target.name;
+    const value = event.target.type === 'checkbox' ? event.target.checked : event.target.value;
+    job[parameter] =value;
+    this.setState({ job: job });
+  },
   handelSubmit(evt) {
-
     let tmpl = this;
-    var start = $(".start-date").val();
-    var end = $(".end-date").val();
-    var value = $("#fields").val();
+    const job = this.state.job;
+    // TODO: change this to real date
+    var start = "2016-04-05";
+    var end = "2017-04-05";
+    job["startDate"] = start;
+    job["endDate"] = end;
+    this.setState({ job: job });
     client.search({
       index: 'server-metrics',
       body: {
@@ -162,12 +205,12 @@ const StreamSelactBox = React.createClass({
           bucket_time: {
             "date_histogram": {
               "field": "@timestamp",
-              "interval": "24h"
+              "interval": this.state.job.buckets,
             },
             aggs: {
-              "server_stats": {
+                                                                                                                                            "server_stats": {
                 "avg": {
-                  "field": value,
+                  "field": this.state.job.field,
                 }
               }
             }
@@ -176,7 +219,6 @@ const StreamSelactBox = React.createClass({
       }
     }).then(function (resp) {
       var hits = resp.hits.hits;
-      console.log(resp);
       var d =    {
         chartData: {
           labels: [],
@@ -194,7 +236,7 @@ const StreamSelactBox = React.createClass({
           ]
         }}
         resp.aggregations.bucket_time.buckets.map(function(b) {
-          d.chartData.labels.push(new Date(b.key_as_string))
+          d.chartData.labels.push(moment(b.key_as_string).format("YYYY-MM-DD"))
           d.chartData.datasets[0].data.push(b.server_stats.value)
         })
         tmpl.setState({rawData:resp.aggregations.bucket_time.buckets});
@@ -205,6 +247,7 @@ const StreamSelactBox = React.createClass({
       });
     },
     render(){
+      const titleField = { is_optional: false, attributes: [], human_name: 'Title', description: "job id details" };
       let chart = null;
       if(this.state.showLine) {
         console.log(this.state.chartData);
@@ -212,43 +255,49 @@ const StreamSelactBox = React.createClass({
       }
       return(
         <div>
-        <Row className="content">
+             <Form state={this.state} onChange={state => this.setState(state)}>
+                 <Row className="content">
+                 <Col md={6}>
+                 <DatePicker onChange={this.onStartSelected} inputClassName="start-date" date={new Date()} />
+                 </Col>
+                 <Col md={6}>
+                 <DatePicker onChange={this.onEndSelected}   inputClassName="end-date" date={new Date()}  />
+                 </Col>
+                 </Row>
+               <Input ref="jobid" name="jobid" id="jobid" type="text" maxLength={100}
+                 labelClassName="col-sm-2" wrapperClassName="col-sm-10"
+                 label="Name" help="Job name" required
+                 onChange={this._onValueChanged} autoFocus />
 
-        <Col md={2}>
-          <DatePicker onChange={this.onStartSelected} inputClassName="start-date" date={new Date()} />
-        </Col>
-        <Col md={2}>
-          <DatePicker onChange={this.onEndSelected}   inputClassName="end-date" date={new Date()}  />
-        </Col>
-        <Col md={2}>
-        <ControlLabel>select aggrigation type</ControlLabel>
-        <FormControl onChange={this.handelAggrigationChange} componentClass="select" id="aggrigationType">
-        {this.state.typeOPs}
-        </FormControl>
-        </Col>
-        <Col md={2}>
-        <ControlLabel>From a New Search  Select Index</ControlLabel>
-        <FormControl onChange={this.handelStreamChange} componentClass="select" id="streamName">
-        {this.state.opts}
-        </FormControl>
-        </Col>
-        <Col md={2}>
-        <ControlLabel>Select fields</ControlLabel>
-        <FormControl  onChange={this.handelFieldChange}  componentClass="select" id="fields">
-        {this.state.optsFields}
-        </FormControl>
-        </Col>
-        <Col md={1}>
-        <Button onClick={this.handelSubmit}> go </Button>
-        <Button onClick={this.handelSaveSubmit}> save </Button>
-        </Col>
-        </Row>
-        <Row className="content">
+                 <Input ref="type" name="aggrigationType" id="aggrigationType" type="select" value={this.state.type}
+                   labelClassName="col-sm-2" wrapperClassName="col-sm-10"
+                   label="Type" help="Select a aggrigation type." required
+                   onChange={this._onValueChanged} ><option value="true">Select</option>
+                    {this.state.typeOPs}
 
-        {chart}
-        </Row>
-
-        </div>
+                 </Input>
+                 <Input ref="streamName" name="streamName" id="streamName" type="select" value={this.state.streamName}
+                   labelClassName="col-sm-2" wrapperClassName="col-sm-10"
+                   label="Stream" help="Select a stream." required
+                   onChange={this.handelStreamChange} > {this.state.opts}
+                 </Input>
+                 <Input ref="fields" name="field" id="fields" type="select" value={this.state.field}
+                   labelClassName="col-sm-2" wrapperClassName="col-sm-10"
+                   label="Field" help="Select a field." required
+                   onChange={this._onValueChanged} > {this.state.optsFields}
+                 </Input>
+                 <Input ref="buckets" name="buckets" id="buckets" type="select" value={this.state.bucket}
+                   labelClassName="col-sm-2" wrapperClassName="col-sm-10"
+                   label="time span" help="Select time span." required
+                   onChange={this._onValueChanged} > {buck}
+                 </Input>
+                 <Button onClick={this.handelSubmit}> go </Button>
+                 <Button onClick={this.handelSaveSubmit}> save </Button>
+             </Form>
+              <div>
+                {chart}
+               </div>
+             </div>
 
 
       )

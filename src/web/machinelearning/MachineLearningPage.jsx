@@ -8,8 +8,21 @@ import RulesList from './RulesList';
 import EditRuleModal from './EditRuleModal';
 import { IfPermitted, PageHeader } from 'components/common';
 import elasticsearch from 'elasticsearch';
+import fetch from 'logic/rest/FetchProvider';
+import { BootstrapTable, TableHeaderColumn } from 'react-bootstrap-table';
+
 
 const MachineLearningPage = React.createClass({
+
+  componentDidMount(){
+    let tmpl = this;
+
+    fetch('GET', "http://localhost:9000/api/plugins/org.graylog.plugins.aggregates/rules").then(function(x) {
+      tmpl.setState({jobs: x.jobs})
+  }, function(err) {
+    console.log(err);
+  });
+  },
 
   getInitialState() {
     return {
@@ -26,13 +39,18 @@ const MachineLearningPage = React.createClass({
     this.setState({showStreamForm: !this.state.showStreamForm})
 
   },
+  stateChange(obj){
+    this.setState({showCreateJob: false});
+    this.setState({showStreamForm: false});
+  },
   render() {
     let showCreateJob = null;
     let streamsform = null;
+    let jobs = null;
     if(this.state.showStreamForm) {
       console.log("true");
       streamsform = (<Row className="content">
-          <StreamSelactBox/>
+          <StreamSelactBox handler={this.stateChange}/>
       </Row>);
     }
     if(this.state.showCreateJob) {
@@ -43,7 +61,20 @@ const MachineLearningPage = React.createClass({
         </Row>
       );
 
+    }else{
+      jobs = (
+        <PageHeader title="Job lists">
+        <BootstrapTable data={this.state.jobs} striped={true} hover={true}>
+            <TableHeaderColumn dataField="jobid" isKey={true} dataAlign="center">Job name</TableHeaderColumn>
+            <TableHeaderColumn dataField="aggrigationType"  >Aggrigation Type</TableHeaderColumn>
+            <TableHeaderColumn dataField="endDate" dataSort={true}>End Date</TableHeaderColumn>
+            <TableHeaderColumn dataField="startDate" dataSort={true}>Start Date</TableHeaderColumn>
+            <TableHeaderColumn dataField="field" >Field</TableHeaderColumn>
+        </BootstrapTable>
+        </PageHeader>
+      );
     }
+
     return (
       <span>
         <PageHeader title="Machine learning">
@@ -58,8 +89,10 @@ const MachineLearningPage = React.createClass({
             </div>
           </span>
         </PageHeader>
+
         {showCreateJob}
         {streamsform}
+        {jobs}
       </span>
     );
   },

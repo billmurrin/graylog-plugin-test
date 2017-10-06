@@ -17,6 +17,7 @@ import org.graylog.plugins.aggregates.rule.RuleService;
 import org.graylog.plugins.aggregates.rule.rest.models.requests.AddJobRequest;
 import org.graylog.plugins.aggregates.rule.rest.models.requests.AddRuleRequest;
 import org.graylog.plugins.aggregates.rule.rest.models.requests.UpdateRuleRequest;
+import org.graylog.plugins.aggregates.rule.rest.models.responses.JobList;
 import org.graylog.plugins.aggregates.rule.rest.models.responses.RulesList;
 import org.graylog2.plugin.rest.PluginRestResource;
 import org.graylog2.shared.rest.resources.RestResource;
@@ -55,12 +56,13 @@ public class RuleResource extends RestResource implements PluginRestResource {
 
     @GET
     @Timed
-    @ApiOperation(value = "Lists all existing rules")
+    @ApiOperation(value = "Lists all existing jobs")
     @RequiresAuthentication
-    @RequiresPermissions(RuleRestPermissions.AGGREGATE_RULES_READ)
-    public RulesList list() {
-        final List<Rule> rules = ruleService.all();
-        return RulesList.create(rules);
+    public JobList list() {
+        System.out.println("list of jobs");
+        final List<Job> jobs = jobService.all();
+        System.out.println(jobs+ "jobs");
+        return JobList.create(jobs);
     }
 
     @PUT
@@ -70,20 +72,12 @@ public class RuleResource extends RestResource implements PluginRestResource {
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "The supplied request is not valid.")
     })
-    public void create(
+    public Response create(
             @ApiParam(name = "JSON body", required = true) @Valid @NotNull AddJobRequest request
     ) {
-
-        System.out.println(request.toString());
         final Job job = jobService.fromRequest(request);
-
-            jobService.create(job);
-            System.out.println("request"+ job);
-
-//        final Rule rule = ruleService.fromRequest(request);
-
-//        ruleService.create(rule);
-//        return Response.accepted().build();
+        jobService.create(job);
+        return Response.accepted().build();
     }
 
     @POST
