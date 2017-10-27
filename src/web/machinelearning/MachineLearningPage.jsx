@@ -60,19 +60,7 @@ const MachineLearningPage = React.createClass({
     let jobDetails = null;
 
     let table = null;
-if(tmpl.state.jobs) {
-
-  table = (  <div>
-    <DataTable id="rule-list"
-    className="table-hover"
-    headers={headers}
-    sortByKey={"name"}
-    rows={tmpl.state.jobs}
-    filterBy="field"
-    filterLabel="Filter Rules"
-    filterKeys={filterKeys}/>
-    </div>);
-}
+ 
     if(this.state.showStreamForm) {
       console.log("true");
       streamsform = (<Row className="content">
