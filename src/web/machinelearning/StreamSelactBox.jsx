@@ -12,7 +12,7 @@ import { TextField } from 'components/configurationforms';
 import DatePicker from 'react-simple-datepicker';
 
 import moment from 'moment';
-
+import { Graph } from 'react-d3-graph';
 import {Form, Field} from 'simple-react-form'
 
 var client = new elasticsearch.Client({
@@ -20,6 +20,33 @@ var client = new elasticsearch.Client({
   log: 'trace',
 });
 
+const myConfig = {
+    highlightBehavior: true,
+    node: {
+        color: 'lightgreen',
+        size: 120,
+        highlightStrokeColor: 'blue'
+    },
+    link: {
+        highlightColor: 'lightblue'
+    }
+};
+
+const onClickNode = function(nodeId) {
+     window.alert('Clicked node', nodeId);
+};
+
+const onMouseOverNode = function(nodeId) {
+     window.alert('Mouse over node', nodeId);
+};
+
+const onMouseOutNode = function(nodeId) {
+     window.alert('Mouse out node', nodeId);
+};
+
+const onClickLink = function(source, target) {
+     window.alert(`Clicked link between ${source} and ${target}`);
+};
 import URLUtils from 'util/URLUtils';
 import ApiRoutes from 'routing/ApiRoutes';
 var chartOptions = {
@@ -153,17 +180,10 @@ const StreamSelactBox = React.createClass({
     const failCallback = (errorThrown) => {
       console.log("errorThrown", errorThrown)
     };
-    var data = this.state.rawData.map(function(k) {
-      return {'key': new Date(k.key_as_string), 'value': k.server_stats.value, 'jobId': tmpl.state.job.jobid }
-    })
     var callback = function(k) {
-        data.map(function(d, index) {
-            client.create({ index: 'ml.anomalydetection', type: '2017', id : randomId(), body: d},function(err,results) {
-          })
-        })
         tmpl.props.handler({showCreateJob: true})
     }
-    fetch('PUT', "http://localhost:9000/api/plugins/org.graylog.plugins.aggregates/rules", {job: this.state.job}).then(callback, failCallback);
+    fetch('PUT', "http://localhost:9000/api/plugins/org.graylog.plugins.machinelearning/rules", {job: this.state.job}).then(callback, failCallback);
 
   },
   _createStreamSelectItems(){

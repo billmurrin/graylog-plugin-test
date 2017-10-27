@@ -12,7 +12,7 @@ before_install:
   ~/.m2/settings.xml
 - git clone --depth=50 --branch=2.3 https://github.com/Graylog2/graylog2-server.git  /home/travis/build/cvtienhoven/graylog2-server
 - cd /home/travis/build/cvtienhoven/graylog2-server; git checkout tags/2.3.0-rc.1; mvn install -DskipTests=true -Dmaven.javadoc.skip=true
-- cd /home/travis/build/cvtienhoven/graylog-plugin-aggregates
+- cd /home/travis/build/cvtienhoven/graylog-plugin-machinelearning
 - echo "finished before_install"
 - pwd
 - ls

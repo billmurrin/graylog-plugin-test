@@ -1,0 +1,66 @@
+package org.graylog.plugins.machinelearning.job;
+
+import javax.validation.constraints.NotNull;
+
+import org.graylog2.database.CollectionName;
+
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+import com.google.auto.value.AutoValue;
+
+@AutoValue
+@JsonAutoDetect
+@JsonIgnoreProperties(ignoreUnknown = true)
+@CollectionName("job_config")
+public abstract class JobImpl implements Job{
+
+
+    @JsonProperty("aggrigationType")
+    @Override
+    @NotNull
+    public abstract String getAggrigationType();
+
+    @JsonProperty("field")
+    @Override
+    @NotNull
+    public abstract String getField();
+
+    @JsonProperty("startDate")
+    @Override
+    @NotNull
+    public abstract String getStartDate();
+
+
+    @JsonProperty("endDate")
+    @Override
+    @NotNull
+    public abstract String getEndDate();
+
+
+    @JsonProperty("streamName")
+    @Override
+    @NotNull
+    public abstract String getStreamName();
+
+
+    @JsonProperty("jobid")
+    @Override
+    @NotNull
+    public abstract String getJobid();
+    @JsonCreator
+    public static JobImpl create( @JsonProperty("aggrigationType") String aggrigationType,
+                                  @JsonProperty("field") String field,
+                                  @JsonProperty("startDate") String startDate,
+                                  @JsonProperty("endDate") String endDate,
+                                  @JsonProperty("streamName") String streamName,
+                                  @JsonProperty("jobid") String  jobid
+                                   ) {
+        return new AutoValue_JobImpl(aggrigationType, field, startDate, endDate, streamName, jobid);
+    }
+
+
+}
+

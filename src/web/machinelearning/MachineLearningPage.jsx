@@ -10,18 +10,19 @@ import { IfPermitted, PageHeader } from 'components/common';
 import elasticsearch from 'elasticsearch';
 import fetch from 'logic/rest/FetchProvider';
 import { BootstrapTable, TableHeaderColumn } from 'react-bootstrap-table';
+import "./style.css"
+import GraphPage from 'machinelearning/GraphPage'
+import ViewGraph from 'machinelearning/ViewGraph'
 
+import { DataTable } from 'components/common';
 
 const MachineLearningPage = React.createClass({
 
   componentDidMount(){
     let tmpl = this;
-
-    fetch('GET', "http://localhost:9000/api/plugins/org.graylog.plugins.aggregates/rules").then(function(x) {
-      tmpl.setState({jobs: x.jobs})
-  }, function(err) {
-    console.log(err);
-  });
+    AggregatesActions.getJobs().then(jobs => {
+      tmpl.setState({ jobs: jobs });
+    });
   },
 
   getInitialState() {
@@ -43,10 +44,35 @@ const MachineLearningPage = React.createClass({
     this.setState({showCreateJob: false});
     this.setState({showStreamForm: false});
   },
+  showJobDetails(evt){
+    this.setState({showJobDetails: true})
+    this.setState({currentJobId: evt.currentTarget.id})
+    console.log(evt.currentTarget.id);
+  },
   render() {
+    const filterKeys = ['name', 'query', 'field', 'stream'];
+    const headers = ['Rule name', 'Query', 'Alert condition', 'Stream', 'In report', 'Repeat notifications', 'Report schedule(s)'];
+
+    let tmpl = this;
     let showCreateJob = null;
     let streamsform = null;
     let jobs = null;
+    let jobDetails = null;
+
+    let table = null;
+if(tmpl.state.jobs) {
+
+  table = (  <div>
+    <DataTable id="rule-list"
+    className="table-hover"
+    headers={headers}
+    sortByKey={"name"}
+    rows={tmpl.state.jobs}
+    filterBy="field"
+    filterLabel="Filter Rules"
+    filterKeys={filterKeys}/>
+    </div>);
+}
     if(this.state.showStreamForm) {
       console.log("true");
       streamsform = (<Row className="content">
@@ -63,17 +89,50 @@ const MachineLearningPage = React.createClass({
 
     }else{
       jobs = (
-        <PageHeader title="Job lists">
-        <BootstrapTable data={this.state.jobs} striped={true} hover={true}>
-            <TableHeaderColumn dataField="jobid" isKey={true} dataAlign="center">Job name</TableHeaderColumn>
-            <TableHeaderColumn dataField="aggrigationType"  >Aggrigation Type</TableHeaderColumn>
-            <TableHeaderColumn dataField="endDate" dataSort={true}>End Date</TableHeaderColumn>
-            <TableHeaderColumn dataField="startDate" dataSort={true}>Start Date</TableHeaderColumn>
-            <TableHeaderColumn dataField="field" >Field</TableHeaderColumn>
-        </BootstrapTable>
+        <PageHeader title="Job lists"> Jobs
+        <table>
+          <tr>
+          <th>Aggrigation Type</th>
+          <th>Start Date</th>
+          <th>End Date</th>
+          <th>Field</th>
+          <th>Jobid</th>
+          </tr>
+          <tbody>
+            {
+              (tmpl.state.jobs || []).map(obj => {
+                return (
+                  <tr key={ obj.jobid }>
+                    <td>{obj.aggrigationType}</td>
+                    <td>{obj.startDate}</td>
+                    <td>{obj.endDate}</td>
+                    <td>{obj.field}</td>
+                    <td>{obj.jobid}</td>
+                    <td id={obj.jobid}  onClick={this.showJobDetails}> view</td>
+                  </tr>
+                 );
+               })
+            }
+          </tbody>
+        </table>
+        <div>
+          {table}
+        </div>
         </PageHeader>
+
       );
     }
+
+
+if(this.state.showJobDetails) {
+  jobDetails = (
+    <PageHeader title="JobDetails"> JobDetails
+    <ViewGraph jobid={this.state.currentJobId}/>
+    </PageHeader>
+
+  )
+}
+
 
     return (
       <span>
@@ -89,10 +148,10 @@ const MachineLearningPage = React.createClass({
             </div>
           </span>
         </PageHeader>
-
         {showCreateJob}
         {streamsform}
         {jobs}
+        {jobDetails}
       </span>
     );
   },

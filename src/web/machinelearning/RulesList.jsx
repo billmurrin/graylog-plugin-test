@@ -136,7 +136,7 @@ const RulesList = React.createClass({
 
     const updatePermitted = this.state.currentUser && this.isPermitted(this.state.currentUser.permissions, 'aggregate_rules:update');
 
-    const inReport = (            
+    const inReport = (
       <input id="toggle-in-report" type="checkbox" checked={rule.inReport} onClick={this._toggleRuleInReportFunction(rule)} disabled={!updatePermitted} ></input>
 
     );
