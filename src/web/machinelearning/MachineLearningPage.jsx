@@ -60,7 +60,7 @@ const MachineLearningPage = React.createClass({
     let jobDetails = null;
 
     let table = null;
- 
+
     if(this.state.showStreamForm) {
       console.log("true");
       streamsform = (<Row className="content">
