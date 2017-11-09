@@ -42,9 +42,7 @@ public class RuleResource extends RestResource implements PluginRestResource {
     @ApiOperation(value = "Lists all existing jobs")
     @RequiresAuthentication
     public JobList list() {
-        System.out.println("list of jobs");
         final List<Job> jobs = jobService.all();
-        System.out.println(jobs+ "jobs");
         return JobList.create(jobs);
     }
 

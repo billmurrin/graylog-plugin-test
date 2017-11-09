@@ -50,15 +50,31 @@ public abstract class JobImpl implements Job{
     @Override
     @NotNull
     public abstract String getJobid();
+
+
+    @JsonProperty("bucketSpan")
+    @Override
+    @NotNull
+    public abstract String getBucketSpan();
+
+
+    @JsonProperty("indexSetName")
+    @Override
+    @NotNull
+    public abstract String getIndexSetName();
+
     @JsonCreator
     public static JobImpl create( @JsonProperty("aggrigationType") String aggrigationType,
                                   @JsonProperty("field") String field,
                                   @JsonProperty("startDate") String startDate,
                                   @JsonProperty("endDate") String endDate,
                                   @JsonProperty("streamName") String streamName,
-                                  @JsonProperty("jobid") String  jobid
+                                  @JsonProperty("jobid") String  jobid,
+                                  @JsonProperty("bucketSpan") String  bucketSpan,
+                                  @JsonProperty("indexSetName") String  indexSetName
+
                                    ) {
-        return new AutoValue_JobImpl(aggrigationType, field, startDate, endDate, streamName, jobid);
+        return new AutoValue_JobImpl(aggrigationType, field, startDate, endDate, streamName, jobid, bucketSpan, indexSetName);
     }
 
 

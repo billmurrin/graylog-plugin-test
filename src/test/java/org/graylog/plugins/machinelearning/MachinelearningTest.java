@@ -59,7 +59,7 @@ public class MachinelearningTest {
 	@InjectMocks
 	@Spy
 	Machinelearning machinelearning;
-	
+
 	@Test
 	public void testBuildRelativeTimeRange() {
 		

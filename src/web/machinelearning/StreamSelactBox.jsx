@@ -107,6 +107,7 @@ const StreamSelactBox = React.createClass({
     };
     var callback = function(res) {
       var arrTen = [];
+      console.log(res.streams, "streams*********************");
       res.streams.map(function(s) {
         arrTen.push(<option key={s.id} value={s.id}> {s.description} </option>);
       })

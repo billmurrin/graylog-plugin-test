@@ -64,7 +64,7 @@ public class JobServiceImpl implements JobService {
     @Override
     public Job fromRequest(AddJobRequest request) {
 
-        return JobImpl.create(request.getJob().getAggrigationType(), request.getJob().getField(), request.getJob().getStartDate(), request.getJob().getEndDate(), request.getJob().getStreamName(), request.getJob().getJobid());
+        return JobImpl.create(request.getJob().getAggrigationType(), request.getJob().getField(), request.getJob().getStartDate(), request.getJob().getEndDate(), request.getJob().getStreamName(), request.getJob().getJobid(), request.getJob().getBucketSpan(), request.getJob().getIndexSetName());
     }
 
     private List<Job> toAbstractListType(DBCursor<JobImpl> job) {

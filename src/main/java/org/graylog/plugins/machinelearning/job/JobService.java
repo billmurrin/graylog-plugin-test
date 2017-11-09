@@ -9,7 +9,6 @@ public interface JobService {
     Job update(String name, Job job);
     Job fromRequest(AddJobRequest request);
     Job create(Job job);
-
     List<Job> all();
 
 }

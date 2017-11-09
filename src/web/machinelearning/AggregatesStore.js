@@ -27,6 +27,22 @@ const AggregatesStore = Reflux.createStore({
         });
     AggregatesActions.getJobs.promise(promise);
   },
+  startJob(jobid){
+    console.log("startJob", jobid);
+    var url = "http://localhost:9000/api/plugins/org.graylog.plugins.machinelearning/jobaction";
+    const promise = fetch('POST', url, jobid)
+      .then(
+        response => {
+          this.jobs = response.jobs;
+          this.trigger({ jobs: this.jobs });
+          return this.jobs;
+        },
+        error => {
+          UserNotification.error(`Fetching aggregate rules failed with status: ${error}`,
+            'Could not retrieve rules');
+        });
+    AggregatesActions.getJobs.promise(promise);
+  },
   list() {
     console.log(this.sourceUrl);
     const promise = fetch('GET', URLUtils.qualifyUrl(this.sourceUrl))

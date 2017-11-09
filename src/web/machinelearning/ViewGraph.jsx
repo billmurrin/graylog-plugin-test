@@ -23,49 +23,54 @@ const MachineLearningPage = React.createClass({
     });
     console.log(this.props,"props");
     // console.log(client);
-console.log(this.props.jobid);
+    console.log(this.props.jobid, "this.props.jobid");
     client.search({
-  index: 'ml.anomalydetection',
-  size:10000,
-  body: {
-    query: {
-      "match": {
-        "jobId":  this.props.jobid,
-     }
-    }
-  }
-}).then(function (resp) {
+      index: 'anomaly_result',
+      size:10000,
+      body: {
+        query: {
+          "match": {
+            "jobid":  this.props.jobid,
+         }
+        }
+      }
+    }).then(function (resp) {
     var hits = resp.hits.hits;
-    console.log(resp);
+    console.log(resp, "resp");
     var res = [];
+    var anom = [];
     resp.hits.hits.map(function(h) {
-      res.push({date : new Date(h._source.key), close: h._source.value })
+      res.push({date : new Date(h._source.timestamp), close: h._source.actual_value })
+      if(h._source.flag === "True") {
+        anom.push({deviation_expected: h._source.deviation_expected, expected_value: h._source.expected_value ,date : new Date(h._source.timestamp), close: h._source.anoms })
+      }
     })
     tmpl.setState({data: res})
+    tmpl.setState({anmdata: anom})
 
 }, function (err) {
     // console.trace(err.message);
 });
-    client.search({
-  index: 'anomaly_index2',
-  size:10000,
-  body: {
-    query: {
-       "match_all": {}
-    }
-  }
-}).then(function (resp) {
-    var hits = resp.hits.hits;
-    console.log(resp, "anom");
-    var res = [];
-    resp.hits.hits.map(function(h) {
-      res.push({ deviation_expected: h._source.deviation_expected, xpected_value: h._source.expected_value, date : new Date(h._source.timestamp), close: h._source.anoms })
-    })
-    tmpl.setState({anmdata: res})
-
-}, function (err) {
-    console.trace(err.message);
-});
+//     client.search({
+//   index: 'anomaly_result',
+//   size:10000,
+//   body: {
+//     query: {
+//        "match_all": {}
+//     }
+//   }
+// }).then(function (resp) {
+//     var hits = resp.hits.hits;
+//     console.log(resp, "anom");
+//     var res = [];
+//     resp.hits.hits.map(function(h) {
+//       res.push({ deviation_expected: h._source.deviation_expected, xpected_value: h._source.expected_value, date : new Date(h._source.timestamp), close: h._source.actual_value })
+//     })
+//     tmpl.setState({anmdata: res})
+//
+// }, function (err) {
+//     console.trace(err.message);
+// });
 fetch('GET', "http://localhost:9000/api/plugins/org.graylog.plugins.machinelearning/rules").then(function(x) {
       tmpl.setState({jobs: x.jobs})
   }, function(err) {
@@ -155,7 +160,7 @@ if(this.state.anmdata) {
   .attr("cx", function(d) { return x(d.date); })
   .attr("cy", function(d) { return y(d.close); })
   .on("mouseover", function(d){
-    return tooltip.style("visibility", "visible").html("Expected value is: "+d.xpected_value + "<br/>"  + "but value was: "+d.close +"<br/>"  + "deviation_expected is: "+d.deviation_expected)
+    return tooltip.style("visibility", "visible").html("Expected value is: "+d.expected_value + "<br/>"  + "value : "+d.close +"<br/>"  + "deviation is: "+d.deviation_expected)
   })
   	.on("mousemove", function(){return tooltip.style("top", (event.pageY-10)+"px").style("left",(event.pageX+10)+"px");})
   	.on("mouseout", function(){return tooltip.style("visibility", "hidden");});
