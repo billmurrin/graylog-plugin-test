@@ -1,19 +1,24 @@
 package org.graylog.plugins.machinelearning.job;
 
 import com.google.common.collect.Lists;
+import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
+import com.mongodb.QueryBuilder;
 import org.graylog.plugins.machinelearning.job.rest.models.requests.AddJobRequest;
 import org.graylog2.bindings.providers.MongoJackObjectMapperProvider;
 import org.graylog2.database.CollectionName;
 import org.graylog2.database.MongoConnection;
 import org.mongojack.DBCursor;
+import org.mongojack.DBQuery;
 import org.mongojack.JacksonDBCollection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import javax.swing.text.Document;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
+import javax.ws.rs.core.Response;
 import java.util.List;
 import java.util.Set;
 
@@ -60,11 +65,17 @@ public class JobServiceImpl implements JobService {
                     "Specified object is not of correct implementation type (" + job.getClass() + ")!");
     }
 
+    @Override
+    public void delete(String jobid) {
+            BasicDBObject document = new BasicDBObject();
+            document.put("jobid", jobid);
+            coll.remove(document);
+
+    }
 
     @Override
     public Job fromRequest(AddJobRequest request) {
-
-        return JobImpl.create(request.getJob().getAggrigationType(), request.getJob().getField(), request.getJob().getStartDate(), request.getJob().getEndDate(), request.getJob().getStreamName(), request.getJob().getJobid(), request.getJob().getBucketSpan(), request.getJob().getIndexSetName());
+          return JobImpl.create(request.getJob().getAggrigationType(), request.getJob().getField(), request.getJob().getStartDate(), request.getJob().getEndDate(), request.getJob().getStreamName(), request.getJob().getJobid(), request.getJob().getBucketSpan(), request.getJob().getIndexSetName(), request.getJob().getJobType());
     }
 
     private List<Job> toAbstractListType(DBCursor<JobImpl> job) {

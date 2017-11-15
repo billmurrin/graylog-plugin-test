@@ -63,6 +63,12 @@ public abstract class JobImpl implements Job{
     @NotNull
     public abstract String getIndexSetName();
 
+
+    @JsonProperty("jobType")
+    @Override
+    @NotNull
+    public abstract String getJobType();
+
     @JsonCreator
     public static JobImpl create( @JsonProperty("aggrigationType") String aggrigationType,
                                   @JsonProperty("field") String field,
@@ -71,10 +77,10 @@ public abstract class JobImpl implements Job{
                                   @JsonProperty("streamName") String streamName,
                                   @JsonProperty("jobid") String  jobid,
                                   @JsonProperty("bucketSpan") String  bucketSpan,
-                                  @JsonProperty("indexSetName") String  indexSetName
-
-                                   ) {
-        return new AutoValue_JobImpl(aggrigationType, field, startDate, endDate, streamName, jobid, bucketSpan, indexSetName);
+                                  @JsonProperty("indexSetName") String  indexSetName,
+                                  @JsonProperty("jobType") String  jobType
+                                  ) {
+        return new AutoValue_JobImpl(aggrigationType, field, startDate, endDate, streamName, jobid, bucketSpan, indexSetName, jobType);
     }
 
 

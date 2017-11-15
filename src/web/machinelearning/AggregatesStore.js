@@ -4,11 +4,12 @@ import UserNotification from 'util/UserNotification';
 import fetch from 'logic/rest/FetchProvider';
 import AggregatesActions from './AggregatesActions';
 
+const fetchOpenCpu = require('logic/rest/FetchProvider').fetchOpenCpu;
+
 const AggregatesStore = Reflux.createStore({
   listenables: [AggregatesActions],
   sourceUrl: '/plugins/org.graylog.plugins.aggregates/rules',
   rules: undefined,
-
   init() {
     this.trigger({ rules: this.rules });
   },
@@ -29,6 +30,7 @@ const AggregatesStore = Reflux.createStore({
   },
   startJob(jobid){
     console.log("startJob", jobid);
+
     var url = "http://localhost:9000/api/plugins/org.graylog.plugins.machinelearning/jobaction";
     const promise = fetch('POST', url, jobid)
       .then(
@@ -42,6 +44,43 @@ const AggregatesStore = Reflux.createStore({
             'Could not retrieve rules');
         });
     AggregatesActions.getJobs.promise(promise);
+  },
+  startJob2(job){
+            var url = "http://35.184.46.103/ocpu/library/smartanomalyv3/R/anomaly/json";
+              job["host_ip"] =  "35.184.46.103";
+               job["indexSetName"] =job.indexSetName+"_0";
+               delete job.streamName;
+               delete job.jobType;
+               console.log(job);
+
+    const promise = fetchOpenCpu('POST', url, job)
+      .then(
+        response => {
+          console.log(response, "cvall response");
+          // this.jobs = response.jobs;
+          // this.trigger({ jobs: this.jobs });
+          return this.jobs;
+        },
+        error => {
+          UserNotification.error(`Fetching aggregate rules failed with status: ${error}`,
+            'Could not retrieve rules');
+        });
+    AggregatesActions.startJob2.promise(promise);
+  },
+  deletejob(jobid){
+    console.log("deletejob", jobid);
+    var url = "http://localhost:9000/api/plugins/org.graylog.plugins.machinelearning/rules/"+jobid
+    const promise = fetch('DELETE', url)
+      .then(
+        response => {
+          UserNotification.success('Jod deleted');
+          this.trigger({ jobs: this.jobs });
+          return this.jobs;
+        },
+        error => {
+          UserNotification.error('deleting job failed');
+        });
+    AggregatesActions.deletejob.promise(promise);
   },
   list() {
     console.log(this.sourceUrl);

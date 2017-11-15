@@ -150,8 +150,6 @@ public class RuleServiceImpl implements RuleService {
 	private List<Rule> toAbstractListType(List<RuleImpl> rules) {
 		final List<Rule> result = Lists.newArrayListWithCapacity(rules.size());
 		result.addAll(rules);
-	
-		
 		return result;
 	}
 }

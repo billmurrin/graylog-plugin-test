@@ -6,7 +6,7 @@ import { Row, Col, Button } from 'react-bootstrap';
 import {FormGroup, ControlLabel, FormControl} from 'react-bootstrap';
 import { LinkContainer } from 'react-router-bootstrap';
 import AggregatesActions from './AggregatesActions';
-import StreamSelactBox from './StreamSelactBox';
+// import StreamSelactBox from './StreamSelactBox';
 import RulesList from './RulesList';
 import EditRuleModal from './EditRuleModal';
 import { IfPermitted, PageHeader } from 'components/common';
@@ -21,6 +21,7 @@ import Input from 'components/bootstrap/Input';
 import moment from 'moment';
 import { DataTable } from 'components/common';
 import { Line } from "react-chartjs";
+import UserNotification from 'util/UserNotification';
 
 var chartOptions = {
   bezierCurve : false,
@@ -31,7 +32,7 @@ var chartOptions = {
 };
 
 var client = new elasticsearch.Client({
-  host: 'localhost:9200',
+  host: '35.184.46.103:9200',
   log: 'trace',
 });
 const MachineLearningPage = React.createClass({
@@ -43,7 +44,9 @@ const MachineLearningPage = React.createClass({
     });
     var aggs = [
       {code: 'avg', value: "Mean"},
-      {code: 'count', value: "Count"},
+      {code: 'sum', value: "Sum"},
+      {code: 'min', value: "Min"},
+      {code: 'max', value: "Max"},
     ]
     var an = [];
     aggs.map(function(a) {
@@ -52,6 +55,18 @@ const MachineLearningPage = React.createClass({
     tmpl.setState({
       typeOPs: an
     })
+    var jobTypes = [
+      {code: 'anomaly', value: "Anomaly"},
+      {code: 'forcast', value: "Forcast"}
+    ]
+    var jt = [];
+    jobTypes.map(function(a) {
+      jt.push(<option key={a.code} value={a.code}> {a.value} </option>);
+    })
+    tmpl.setState({
+      jobTypeops: jt
+    })
+
     var buckets = [
       {code: '5m', value: "5m"},
       {code: '10m', value: "10m"},
@@ -80,7 +95,7 @@ const MachineLearningPage = React.createClass({
     };
     var callback = function(res) {
       var arrTen = [];
-      console.log(res.streams);
+      // console.log(res.streams);
       res.streams.map(function(s) {
         arrTen.push(<option id={s.index_set_id} key={s.id} value={s.id}> {s.description} </option>);
       })
@@ -90,48 +105,28 @@ const MachineLearningPage = React.createClass({
     }
     fetch('GET', "http://localhost:9000/api/streams/").then(callback, failCallback);
   },
-
   getInitialState() {
     return {
       showCreateJob: false,
     };
-  },
-  handelCreatejob(evt) {
-    this.setState({showCreateJob: !this.state.showCreateJob})
-
-  },
-  handleAnomalyDetection(evt){
-    console.log(evt, "handleAnomalyDetection");
-    console.log(elasticsearch, "elasticsearch instance")
-    this.setState({showStreamForm: !this.state.showStreamForm})
-
-  },
-  stateChange(obj){
-    this.setState({showCreateJob: false});
-    this.setState({showStreamForm: false});
   },
   showJobDetails(jobid){
     this.setState({showJobDetails: true})
     this.setState({currentJobId: jobid})
   },
   _ruleInfoFormatter(job) {
-    console.log(job);
     const view = (
-      <button onClick={this._viewjob} id={job.jobid} type="button" className="btn btn-xs btn-primary" title="view job"       >
-      View
-      </button>
+      <i className="fa fa-eye fa-2x" onClick={this._viewjob} id={job.jobid}  title="view job"></i>
     );
     const start = (
-      <button onClick={this._startjob} id={job.jobid} type="button" className="btn btn-xs btn-primary" title="start job"       >
-      Start
-      </button>
+      <i onClick={this._startjob} id={job.jobid} className="fa fa-play fa-2x" title="start job" ></i>
+    );
+    const del = (
+      <i onClick={this._deletejob} id={job.jobid} className="fa fa-trash fa-2x" title="deletejob" ></i>
     );
     const actions = (
       <div>
-        {view}
-        &nbsp;
-        {start}
-        &nbsp;
+        {view}&nbsp;&nbsp;{start}&nbsp;&nbsp;{del}&nbsp;
       </div>
     );
     return (
@@ -141,6 +136,7 @@ const MachineLearningPage = React.createClass({
       <td className="limited">{job.endDate}</td>
       <td className="limited">{job.field}</td>
       <td className="limited">{job.jobid}</td>
+      <td className="limited">{job.jobType}</td>
       <td>{actions}</td>
       </tr>
     );
@@ -181,56 +177,63 @@ const MachineLearningPage = React.createClass({
     const value = event.target.type === 'checkbox' ? event.target.checked : event.target.value;
     if(!job)  job = {};
     job[parameter] = value.trim();
-
     this.setState({ job: job });
   },
   _viewjob(evt){
     let tmpl = this;
-    console.log(evt.currentTarget.id);
     tmpl.setState({showJobDetails:true})
     tmpl.setState({currentJobId:evt.currentTarget.id})
   },
   _startjob(evt){
-    let tmpl = this;
-    AggregatesActions.startJob(evt.currentTarget.id).then(status => {
+    let tmpl = this;;
+     var job = this.state.jobs.find(x => x.jobid === evt.currentTarget.id);
+    AggregatesActions.startJob2(job).then(status => {
       console.log(status);
     });
-    return
   },
-
+  _deletejob(evt){
+    let tmpl = this;
+    if (window.confirm(`Do you really want to delete job`)) {
+      AggregatesActions.deletejob(evt.currentTarget.id).then(status => {
+        AggregatesActions.getJobs().then(jobs => {
+          tmpl.setState({ jobs: jobs ? jobs: [] });
+        });
+      });
+    }
+  },
   handelStreamChange(evt){
     let tmpl = this;
     var streamName = evt.currentTarget.value;
     const job = this.state.job;
-    console.log($(evt.target).find('option:selected').attr('id'), "currentTarget");
     const parameter = evt.target.name;
     const value = evt.target.type === 'checkbox' ? evt.target.checked : evt.target.value;
     job[parameter] =value;
     var url = "http://localhost:9000/api/system/indices/index_sets/"+ $(evt.target).find('option:selected').attr('id');
-    const fb = (errorThrown) => {
-    console.log("errorThrown", errorThrown)
-  };
-  var cb = function(res) {
-    var indexName = Object.keys(res)[0]
-    var arrTen = [];
-    var obj = res[indexName].mappings.metric.properties;
-    for (var k in obj) {
-      if (obj.hasOwnProperty(k) && ( obj[k].type=== "long" || obj[k].type=== "float") ) {
-        arrTen.push(<option key={k} value={k}> {k} </option>);
+    const fb = (errorThrown) => {   };
+    var cb = function(res) {
+      var indexName = Object.keys(res)[0]
+      var arrTen = [];
+        var obj = res[indexName].mappings.metric.properties;
+      for (var k in obj) {
+        if (obj.hasOwnProperty(k) && ( obj[k].type=== "long" || obj[k].type=== "float") ) {
+          arrTen.push(<option key={k} value={k}> {k} </option>);
+        }
       }
-    }
     tmpl.setState({
       optsFields: arrTen
     });
   }
-
     var callback = function(res) {
       job.indexSetName = res.index_prefix;
       tmpl.setState({ job: job });
-      client.indices.getMapping({index: job.indexSetName}, function(error, response) {
+      client.indices.getMapping({index: job.indexSetName+"_0"}, function(error, response) {
         if (error) {
           console.log(error);
+          if(error.status === 404) {
+            UserNotification.error("Index not found", job.indexSetName);
+          }
         } else {
+          console.log(response);
           cb(response)
         }
       });
@@ -239,8 +242,6 @@ const MachineLearningPage = React.createClass({
       console.log(err);
     }
     fetch('GET', url).then(callback, failCallback);
-
-
   },
   _setDateTimeToNow(field) {
     return () => {
@@ -252,63 +253,55 @@ const MachineLearningPage = React.createClass({
   showGraph(){
     let tmpl = this;
     const job = this.state.job;
-    client.search({
-      index: 'server-metrics',
-      body: {
-        "query": {
-          "range": {
-            "@timestamp": {
-              "gte": moment(job.startDate).format("YYYY-MM-DD"),
-              "lte": moment(job.endDate).format("YYYY-MM-DD")
-            }
+    var query = {
+        "range": {
+          "@timestamp": {
+            "gte": moment(job.startDate).format("YYYY-MM-DD"),
+            "lte": moment(job.endDate).format("YYYY-MM-DD")
           }
-        },
-        aggs: {
+        }
+    }
+    var aggs = {
           bucket_time: {
             "date_histogram": {
               "field": "@timestamp",
               "interval": this.state.job.bucketSpan,
             },
             aggs: {
-                                                                                                                                            "server_stats": {
-                "avg": {
-                  "field": this.state.job.field,
-                }
+              "server_stats": {
               }
             }
           }
         }
-      }
-    }).then(function (resp) {
-      var hits = resp.hits.hits;
-      var d =    {
-        chartData: {
-          labels: [],
-          datasets: [
-            {
-              fillColor: "#25BDFF",
-              strokeColor: "#25BDFF",
-              pointColor: "#25BDFF",
-              pointStrokeColor: "#fff",
-              pointHighlightFill: "#fff",
-              pointHighlightStroke: "#25BDFF",
-              data: []
-            }
-
-          ]
-        }}
-        resp.aggregations.bucket_time.buckets.map(function(b) {
-          d.chartData.labels.push(moment(b.key_as_string).format("YYYY-MM-DD"))
-          d.chartData.datasets[0].data.push(b.server_stats.value)
-        })
-        tmpl.setState({rawData:resp.aggregations.bucket_time.buckets});
-        tmpl.setState({chartData:d.chartData})
-        tmpl.setState({showLine:true})
-      }, function (err) {
-        console.trace(err.message);
-      });
-    this.setState({graphDisplayed: true})
-    return;
+        aggs.bucket_time.aggs.server_stats[job.aggrigationType] = {"field": this.state.job.field}
+        client.search({
+          index: job.indexSetName+"_0",
+          body: {query, aggs}
+        }).then(function (resp) {
+          var hits = resp.hits.hits;
+          var d =    {
+            chartData: {
+              labels: [],
+              datasets: [
+                {
+                  fillColor: "#25BDFF",
+                  strokeColor: "#25BDFF",
+                  data: []
+                }
+              ]
+            }}
+            resp.aggregations.bucket_time.buckets.map(function(b) {
+              d.chartData.labels.push(moment(b.key_as_string).format("YYYY-MM-DD"))
+              d.chartData.datasets[0].data.push(b.server_stats.value)
+            })
+            tmpl.setState({rawData:resp.aggregations.bucket_time.buckets});
+            tmpl.setState({chartData:d.chartData})
+            tmpl.setState({showLine:true})
+          }, function (err) {
+            // console.trace(err.message);
+          });
+        this.setState({graphDisplayed: true})
+        return;
   },
   _save(){
     let tmpl = this;
@@ -316,21 +309,19 @@ const MachineLearningPage = React.createClass({
       console.log("errorThrown", errorThrown)
     };
     var callback = function(k) {
-        // tmpl.props.handler({showCreateJob: true})
         tmpl.refs.modal.close();
+        AggregatesActions.getJobs().then(jobs => {
+          tmpl.setState({ jobs: jobs });
+        });
     }
-    console.log(this.state.job, "before saving");
-
+    // console.log(this.state.job, "before saving");
     fetch('PUT', "http://localhost:9000/api/plugins/org.graylog.plugins.machinelearning/rules", {job: this.state.job}).then(callback, failCallback);
   },
   _onDateSelected(field) {
-    console.log(field);
     return (date, _, event) => {
       const inputField = this.refs[`${field}Formatted`].getInputDOMNode();
       const midnightDate = date.setHours(0);
-      console.log(date);
       inputField.value = DateTime.ignoreTZ(midnightDate).toString(DateTime.Formats.DATETIME);
-      console.log(field);
       this._rangeParamsChanged(field)();
     };
   },
@@ -340,8 +331,6 @@ const MachineLearningPage = React.createClass({
     if(!job)  job = {};
     return () => {
       let refInput;
-
-      /* eslint-disable no-case-declarations */
       switch (key) {
         case 'startDate':
         case 'endDate':
@@ -356,43 +345,22 @@ const MachineLearningPage = React.createClass({
         default:
           refInput = this.refs[key];
       }
-      /* eslint-enable no-case-declarations */
       job[key] = moment(refInput.getValue()).format("YYYY-MM-DD"),
       tmpl.setState({job: job});
-      // SearchStore.rangeParams = this.state.rangeParams.set(key, refInput.getValue());
     };
   },
   render() {
 
     let tmpl = this;
     let showCreateJob = null;
-    let streamsform = null;
     let jobs = null;
-    let jobs2 = null;
-    let jobDetails = null;
-
+    let jobsdetails = null;
     let table = null;
     let chart = null;
-
-    if(this.state.showStreamForm) {
-      console.log("true");
-      streamsform = (<Row className="content">
-      <StreamSelactBox handler={this.stateChange}/>
-      </Row>);
-    }
-    if(this.state.showCreateJob) {
-      showCreateJob =  (
-        <Row className="content">
-        <Button bsSize="large" className="buttonColor buttonBg" onClick={this.handleAnomalyDetection} >Anomaly Detection</Button>
-        <Button bsSize="large" disabled={this.state.showStream} className="buttonColor buttonBg" style={{marginLeft: 10}}> Forecasting </Button>
-        </Row>
-      );
-
-    }
-    const filterKeys = ['jobid','field', 'aggrigationType'];
-    const headers = ['Aggrigation Type', 'Start Date', 'EndDate', 'Field', 'Job Id'];
+   const filterKeys = ['jobid','field', 'aggrigationType'];
+    const headers = ['Aggrigation Type', 'Start Date', 'EndDate', 'Field', 'Job Id', 'Job Type'];
     if(this.state.jobs && !this.state.showJobDetails) {
-      jobs2 = (
+      jobsdetails = (
         <PageHeader>
         <DataTable id="job-list"
         className="table-hover"
@@ -407,33 +375,22 @@ const MachineLearningPage = React.createClass({
 
       }
       else {
-        console.log(this.state, "ELASE");
-        jobs2 = (
+        jobsdetails = (
             <PageHeader title="JobDetails"> JobDetails
               <ViewGraph jobid={this.state.currentJobId}/>
             </PageHeader>
             )
       }
       if(this.state.showLine) {
-        console.log(this.state.chartData);
+        // console.log(this.state.chartData);
         chart = (<Line data={this.state.chartData} options={chartOptions} width="1100" height="540" />);
       }
-      if(this.state.showJobDetails) {
-        jobDetails = (
-          <PageHeader title="JobDetails"> JobDetails
-          <ViewGraph jobid={this.state.currentJobId}/>
-          </PageHeader>
-
-        )
-      }
-
       return (
         <span>
           <PageHeader title="Machine learning">
               <span>
               please define Machine learning here
               </span>
-
             <span>
               <div>
                 <Button className="buttonColor buttonBg" onClick={this.openModal}>Create Job </Button>
@@ -443,25 +400,28 @@ const MachineLearningPage = React.createClass({
                 onSubmitForm={this._save}
                 submitButtonText="Save"
                 submitButtonDisabled={!this.state.graphDisplayed}>
-
                   <fieldset>
                       <Input ref="jobid" name="jobid" id="jobid" type="text" maxLength={100} defaultValue={this.state.originalName}
                       labelClassName="col-sm-2" wrapperClassName="col-sm-10"
                       label="Name" help="Enter a unique job id." required
                       onChange={this._onValueChanged} autoFocus />
-
-
-                      <Input ref="type" name="aggrigationType" id="aggrigationType" type="select" value={this.state.type}
+                     <Input ref="jobType" name="jobType" id="jobType" type="select" value={this.state.jobType}
                         labelClassName="col-sm-2" wrapperClassName="col-sm-10"
-                        label="Type" help="Select a aggrigation type." required
+                        label="Job Type" help="Select a job Type." required
+                        onChange={this._onValueChanged} ><option value="true">Select</option>
+                         {this.state.jobTypeops}
+                      </Input>
+                     <Input ref="type" name="aggrigationType" id="aggrigationType" type="select" value={this.state.type}
+                        labelClassName="col-sm-2" wrapperClassName="col-sm-10"
+                        label="Aggrigation Type" help="Select a aggrigation type." required
                         onChange={this._onValueChanged} ><option value="true">Select</option>
                          {this.state.typeOPs}
                       </Input>
-
                       <Input ref="streamName" name="streamName" id="streamName" type="select" value={this.state.streamName}
                         labelClassName="col-sm-2" wrapperClassName="col-sm-10"
                         label="Stream" help="Select a stream." required
-                        onChange={this.handelStreamChange} > {this.state.opts}
+                        onChange={this.handelStreamChange} > <option value="true">Select</option>
+                         {this.state.opts}
                       </Input>
                       <Input ref="fields" name="field" id="fields" type="select" value={this.state.field}
                         labelClassName="col-sm-2" wrapperClassName="col-sm-10"
@@ -473,38 +433,37 @@ const MachineLearningPage = React.createClass({
                         label="time span" help="Select time span." required
                         onChange={this._onValueChanged} > {this.state.buck}
                       </Input>
-
-                              <div className="row no-bm" style={{ marginLeft: 50 }}>
-                                <div className="col-md-6" style={{ padding: 0 }}>
-                                  <DatePicker id="searchFromDatePicker"
-                                    title="Search start date"
-                                    onChange={this._onDateSelected('startDate')} className="form-control">
-                                    <Input type="text"
-                                    ref="startDateFormatted"
-                                    onChange={this._rangeParamsChanged('startDate')}
-                                    placeholder={DateTime.Formats.DATETIME}
-                                    label="Start"
-                                    buttonAfter={<Button bsSize="small" onClick={this._setDateTimeToNow('startDate')}><i className="fa fa-magic" /></Button>}
-                                    bsSize="small"
-                                    required />
-                                  </DatePicker>
-                                </div>
-                                <div className="col-md-5" style={{ padding: 0 }}>
-                                  <DatePicker id="searchToDatePicker"
-                                    title="Search End date"
-                                    onChange={this._onDateSelected('endDate')} className="form-control">
-                                    <Input type="text"
-                                    ref="endDateFormatted"
-                                    labelClassName="col-sm-2"
-                                    label="End"
-                                    onChange={this._rangeParamsChanged('endDate')}
-                                    placeholder={DateTime.Formats.DATETIME}
-                                    buttonAfter={<Button bsSize="small" onClick={this._setDateTimeToNow('startDate')}><i className="fa fa-magic" /></Button>}
-                                    bsSize="small"
-                                    required />
-                                  </DatePicker>
-                                </div>
-                              </div>
+                      <div className="row no-bm" style={{ marginLeft: 50 }}>
+                        <div className="col-md-6" style={{ padding: 0 }}>
+                          <DatePicker id="searchFromDatePicker"
+                            title="Search start date"
+                            onChange={this._onDateSelected('startDate')} className="form-control">
+                            <Input type="text"
+                            ref="startDateFormatted"
+                            onChange={this._rangeParamsChanged('startDate')}
+                            placeholder={DateTime.Formats.DATETIME}
+                            label="Start"
+                            buttonAfter={<Button bsSize="small" onClick={this._setDateTimeToNow('startDate')}><i className="fa fa-magic" /></Button>}
+                            bsSize="small"
+                            required />
+                          </DatePicker>
+                        </div>
+                        <div className="col-md-5" style={{ padding: 0 }}>
+                          <DatePicker id="searchToDatePicker"
+                            title="Search End date"
+                            onChange={this._onDateSelected('endDate')} className="form-control">
+                            <Input type="text"
+                            ref="endDateFormatted"
+                            labelClassName="col-sm-2"
+                            label="End"
+                            onChange={this._rangeParamsChanged('endDate')}
+                            placeholder={DateTime.Formats.DATETIME}
+                            buttonAfter={<Button bsSize="small" onClick={this._setDateTimeToNow('startDate')}><i className="fa fa-magic" /></Button>}
+                            bsSize="small"
+                            required />
+                          </DatePicker>
+                        </div>
+                      </div>
                       <button onClick={this.showGraph} id="view-job" type="button" className="btn btn-xs btn-primary pull-right" title="view job">
                         View graph
                       </button>
@@ -513,7 +472,7 @@ const MachineLearningPage = React.createClass({
               </BootstrapModalForm>
             </span>
           </PageHeader>
-          {jobs2}
+          {jobsdetails}
         </span>
       );
     },

@@ -19,4 +19,6 @@ public interface Job {
 
     public String getIndexSetName();
 
+    public String getJobType();
+
 }

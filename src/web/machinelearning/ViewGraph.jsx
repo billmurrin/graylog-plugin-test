@@ -16,14 +16,10 @@ const MachineLearningPage = React.createClass({
 
   componentDidMount(){
     let tmpl = this;
-    // console.log("componentDidMount");
     var client = new elasticsearch.Client({
-      host: 'localhost:9200',
+      host: '35.184.46.103:9200',
       log: 'trace'
     });
-    console.log(this.props,"props");
-    // console.log(client);
-    console.log(this.props.jobid, "this.props.jobid");
     client.search({
       index: 'anomaly_result',
       size:10000,
@@ -36,46 +32,25 @@ const MachineLearningPage = React.createClass({
       }
     }).then(function (resp) {
     var hits = resp.hits.hits;
-    console.log(resp, "resp");
     var res = [];
     var anom = [];
     resp.hits.hits.map(function(h) {
       res.push({date : new Date(h._source.timestamp), close: h._source.actual_value })
-      if(h._source.flag === "True") {
+      if(h._source.flag) {
         anom.push({deviation_expected: h._source.deviation_expected, expected_value: h._source.expected_value ,date : new Date(h._source.timestamp), close: h._source.anoms })
       }
+      console.log(anom, "sdfjhsd****888");
     })
     tmpl.setState({data: res})
     tmpl.setState({anmdata: anom})
-
 }, function (err) {
-    // console.trace(err.message);
+    console.trace(err.message);
 });
-//     client.search({
-//   index: 'anomaly_result',
-//   size:10000,
-//   body: {
-//     query: {
-//        "match_all": {}
-//     }
-//   }
-// }).then(function (resp) {
-//     var hits = resp.hits.hits;
-//     console.log(resp, "anom");
-//     var res = [];
-//     resp.hits.hits.map(function(h) {
-//       res.push({ deviation_expected: h._source.deviation_expected, xpected_value: h._source.expected_value, date : new Date(h._source.timestamp), close: h._source.actual_value })
-//     })
-//     tmpl.setState({anmdata: res})
-//
-// }, function (err) {
-//     console.trace(err.message);
-// });
-fetch('GET', "http://localhost:9000/api/plugins/org.graylog.plugins.machinelearning/rules").then(function(x) {
-      tmpl.setState({jobs: x.jobs})
-  }, function(err) {
-    console.log(err);
-  });
+// fetch('GET', "http://localhost:9000/api/plugins/org.graylog.plugins.machinelearning/rules").then(function(x) {
+//       tmpl.setState({jobs: x.jobs})
+//   }, function(err) {
+//     console.log(err);
+//   });
   },
 
   getInitialState() {
@@ -87,18 +62,7 @@ fetch('GET', "http://localhost:9000/api/plugins/org.graylog.plugins.machinelearn
     this.setState({showCreateJob: !this.state.showCreateJob})
 
   },
-  handleAnomalyDetection(evt){
-    console.log(evt, "handleAnomalyDetection");
-    console.log(elasticsearch, "elasticsearch instance")
-    this.setState({showStreamForm: !this.state.showStreamForm})
-
-  },
-  stateChange(obj){
-    this.setState({showCreateJob: false});
-    this.setState({showStreamForm: false});
-  },
   render() {
-    console.log(this.state);
     if(this.state.data) {
       var data = this.state.data;
       var svg = d3.select("svg");
@@ -148,8 +112,6 @@ fetch('GET', "http://localhost:9000/api/plugins/org.graylog.plugins.machinelearn
       	.style("z-index", "10")
       	.style("visibility", "hidden")
       	.text("a simple tooltip");
-
-console.log(this.state.anmdata);
 if(this.state.anmdata) {
   g.selectAll(".dot")
   .data(this.state.anmdata)
