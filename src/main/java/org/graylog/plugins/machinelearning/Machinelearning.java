@@ -115,7 +115,6 @@ public class Machinelearning extends Periodical {
 
 						LOG.debug("built query: " + result.getBuiltQuery());
 
-						LOG.debug("query took " + result.tookMs() + "ms");
 
 						Map<String, Long> matchedTerms = new HashMap<String, Long>();
 						long ruleCount = 0;

@@ -15,6 +15,7 @@ import fetch from 'logic/rest/FetchProvider';
 import { BootstrapTable, TableHeaderColumn } from 'react-bootstrap-table';
 import "./style.css"
 import GraphPage from 'machinelearning/GraphPage'
+import client from 'machinelearning/ElasticSearch'
 import ViewGraph from 'machinelearning/ViewGraph'
 import BootstrapModalForm from 'components/bootstrap/BootstrapModalForm';
 import Input from 'components/bootstrap/Input';
@@ -31,10 +32,7 @@ var chartOptions = {
   responsive: true
 };
 
-var client = new elasticsearch.Client({
-  host: '35.184.46.103:9200',
-  log: 'trace',
-});
+// var client = ElasticSearch;
 const MachineLearningPage = React.createClass({
 
   componentDidMount(){
@@ -42,6 +40,7 @@ const MachineLearningPage = React.createClass({
     AggregatesActions.getJobs().then(jobs => {
       tmpl.setState({ jobs: jobs });
     });
+    AggregatesActions.getConfigs();
     var aggs = [
       {code: 'avg', value: "Mean"},
       {code: 'sum', value: "Sum"},
@@ -226,6 +225,7 @@ const MachineLearningPage = React.createClass({
     var callback = function(res) {
       job.indexSetName = res.index_prefix;
       tmpl.setState({ job: job });
+      console.log(client);
       client.indices.getMapping({index: job.indexSetName+"_0"}, function(error, response) {
         if (error) {
           console.log(error);

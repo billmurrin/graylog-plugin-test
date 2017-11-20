@@ -1,4 +1,4 @@
-//package org.graylog.plugins.aggregates.report;
+//package org.graylog.plugins.machinelearning.report;
 //
 //import java.io.FileNotFoundException;
 //import java.io.FileOutputStream;

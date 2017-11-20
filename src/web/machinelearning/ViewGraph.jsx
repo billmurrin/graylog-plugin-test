@@ -11,15 +11,16 @@ import elasticsearch from 'elasticsearch';
 import fetch from 'logic/rest/FetchProvider';
 import { BootstrapTable, TableHeaderColumn } from 'react-bootstrap-table';
 import * as d3 from "d3";
+import client from 'machinelearning/ElasticSearch'
 
 const MachineLearningPage = React.createClass({
 
   componentDidMount(){
     let tmpl = this;
-    var client = new elasticsearch.Client({
-      host: '35.184.46.103:9200',
-      log: 'trace'
-    });
+    // var client = new elasticsearch.Client({
+    //   host: '35.193.61.95:9200',
+    //   log: 'trace'
+    // });
     client.search({
       index: 'anomaly_result',
       size:10000,
@@ -39,7 +40,7 @@ const MachineLearningPage = React.createClass({
       if(h._source.flag) {
         anom.push({deviation_expected: h._source.deviation_expected, expected_value: h._source.expected_value ,date : new Date(h._source.timestamp), close: h._source.anoms })
       }
-      console.log(anom, "sdfjhsd****888");
+      // console.log(anom, "sdfjhsd****888");
     })
     tmpl.setState({data: res})
     tmpl.setState({anmdata: anom})

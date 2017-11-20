@@ -8,6 +8,7 @@ import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
+import org.graylog.plugins.machinelearning.MachinelearningConfiguration;
 import org.graylog.plugins.machinelearning.job.Job;
 import org.graylog.plugins.machinelearning.job.JobService;
 import org.graylog.plugins.machinelearning.job.rest.models.requests.AddJobRequest;
@@ -31,6 +32,7 @@ import org.graylog2.Configuration;
 public class RuleResource extends RestResource implements PluginRestResource {
     private final JobService jobService;
     private final Configuration conf;
+
 
     @Inject
     public RuleResource(JobService jobService, Configuration conf) {

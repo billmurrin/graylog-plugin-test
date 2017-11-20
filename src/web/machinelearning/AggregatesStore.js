@@ -8,7 +8,7 @@ const fetchOpenCpu = require('logic/rest/FetchProvider').fetchOpenCpu;
 
 const AggregatesStore = Reflux.createStore({
   listenables: [AggregatesActions],
-  sourceUrl: '/plugins/org.graylog.plugins.aggregates/rules',
+  sourceUrl: '/plugins/org.graylog.plugins.machinelearning/rules',
   rules: undefined,
   init() {
     this.trigger({ rules: this.rules });
@@ -45,9 +45,21 @@ const AggregatesStore = Reflux.createStore({
         });
     AggregatesActions.getJobs.promise(promise);
   },
+  getConfigs(){
+    var url = "http://localhost:9000/api/plugins/org.graylog.plugins.machinelearning/configurations";
+    const promise = fetch('GET', url)
+      .then(
+        response => {
+          window.appConfig.mlConfig = response;
+        },
+        error => {
+          UserNotification.error('Fetching Configs failed');
+        });
+        AggregatesActions.getConfigs.promise(promise);
+  },
   startJob2(job){
-            var url = "http://35.184.46.103/ocpu/library/smartanomalyv3/R/anomaly/json";
-              job["host_ip"] =  "35.184.46.103";
+            var url = "http://35.193.61.95/ocpu/library/smartanomalyv3/R/anomaly/json";
+              job["host_ip"] =  "35.193.61.95";
                job["indexSetName"] =job.indexSetName+"_0";
                delete job.streamName;
                delete job.jobType;

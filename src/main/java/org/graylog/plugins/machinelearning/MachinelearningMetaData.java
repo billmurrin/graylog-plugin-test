@@ -44,7 +44,7 @@ public class MachinelearningMetaData implements PluginMetaData {
 
     @Override
     public Version getRequiredVersion() {
-        return new Version(2, 3, 0);
+        return new Version(2, 0, 0);
     }
 
     @Override

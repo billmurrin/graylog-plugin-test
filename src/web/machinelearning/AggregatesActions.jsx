@@ -13,6 +13,7 @@ const AggregatesActions = Reflux.createActions({
   startJob: { asyncResult: true },
   startJob2: { asyncResult: true },
   deletejob: { asyncResult: true },
+  getConfigs: { asyncResult: false },
 });
 
 export default AggregatesActions;
