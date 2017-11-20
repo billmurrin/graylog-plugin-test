@@ -11,8 +11,7 @@ import SchedulesPage from 'machinelearning/SchedulesPage'
 const manifest = new PluginManifest(packageJson, {
 
   routes: [
-    { path: '/machineLearning', component: MachineLearningPage, permissions: 'AGGREGATE_RULES_READ,AGGREGATE_REPORT_SCHEDULES_READ' },
-    { path: '/machineLearning/graph', component: GraphPage, permissions: 'AGGREGATE_RULES_READ,AGGREGATE_REPORT_SCHEDULES_READ' },
+    { path: '/machineLearning', component: MachineLearningPage },
   ],
 
   navigation: [
