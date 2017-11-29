@@ -6,6 +6,7 @@ import { Row, Col, Button } from 'react-bootstrap';
 import {FormGroup, ControlLabel, FormControl} from 'react-bootstrap';
 import { LinkContainer } from 'react-router-bootstrap';
 import AggregatesActions from './AggregatesActions';
+import MachinelearningActions from './MachinelearningActions';
 // import StreamSelactBox from './StreamSelactBox';
 import RulesList from './RulesList';
 import EditRuleModal from './EditRuleModal';
@@ -23,7 +24,22 @@ import moment from 'moment';
 import { DataTable } from 'components/common';
 import { Line } from "react-chartjs";
 import UserNotification from 'util/UserNotification';
+import URLUtils from 'util/URLUtils';
 
+import Reflux from 'reflux';
+import AggregatesStore from './AggregatesStore';
+
+
+import StoreProvider from 'injection/StoreProvider';
+const StreamsStore = StoreProvider.getStore('Streams');
+const CurrentUserStore = StoreProvider.getStore('CurrentUser');
+
+import CombinedProvider from 'injection/CombinedProvider';
+const { AlertNotificationsStore } = CombinedProvider.get('AlertNotifications');
+
+import { Spinner } from 'components/common';
+import PermissionsMixin from 'util/PermissionsMixin';
+import SchedulesActions from './SchedulesActions';
 var chartOptions = {
   bezierCurve : false,
   datasetFill : false,
@@ -34,13 +50,12 @@ var chartOptions = {
 
 // var client = ElasticSearch;
 const MachineLearningPage = React.createClass({
-
+  mixins: [Reflux.connect(CurrentUserStore), Reflux.connect(AggregatesStore), Reflux.connect(AlertNotificationsStore)],
   componentDidMount(){
     let tmpl = this;
     AggregatesActions.getJobs().then(jobs => {
       tmpl.setState({ jobs: jobs });
     });
-    AggregatesActions.getConfigs();
     var aggs = [
       {code: 'avg', value: "Mean"},
       {code: 'sum', value: "Sum"},
@@ -76,6 +91,7 @@ const MachineLearningPage = React.createClass({
       {code: '60m', value: "60m"},
       {code: '70m', value: "70m"},
       {code: '80m', value: "80m"},
+      {code: '3h', value: "3h"},
       {code: '5h', value: "5h"},
       {code: '10h', value: "10h"},
       {code: '20h', value: "20h"},
@@ -94,6 +110,7 @@ const MachineLearningPage = React.createClass({
     };
     var callback = function(res) {
       var arrTen = [];
+      console.log(res);
       // console.log(res.streams);
       res.streams.map(function(s) {
         arrTen.push(<option id={s.index_set_id} key={s.id} value={s.id}> {s.description} </option>);
@@ -102,7 +119,7 @@ const MachineLearningPage = React.createClass({
         opts: arrTen
       });
     }
-    fetch('GET', "http://localhost:9000/api/streams/").then(callback, failCallback);
+    fetch('GET', URLUtils.qualifyUrl("/streams/")).then(callback, failCallback);
   },
   getInitialState() {
     return {
@@ -207,41 +224,24 @@ const MachineLearningPage = React.createClass({
     const parameter = evt.target.name;
     const value = evt.target.type === 'checkbox' ? evt.target.checked : evt.target.value;
     job[parameter] =value;
-    var url = "http://localhost:9000/api/system/indices/index_sets/"+ $(evt.target).find('option:selected').attr('id');
-    const fb = (errorThrown) => {   };
-    var cb = function(res) {
-      var indexName = Object.keys(res)[0]
-      var arrTen = [];
-        var obj = res[indexName].mappings.metric.properties;
-      for (var k in obj) {
-        if (obj.hasOwnProperty(k) && ( obj[k].type=== "long" || obj[k].type=== "float") ) {
-          arrTen.push(<option key={k} value={k}> {k} </option>);
-        }
+    var url = URLUtils.qualifyUrl("/system/indices/index_sets/"+ $(evt.target).find('option:selected').attr('id'));
+      var callback = function(res) {
+        job.indexSetName = res.index_prefix;
+        tmpl.setState({ job: job });
+        SchedulesActions.getFields( job.indexSetName+"_0").then(fields => {
+          var arrTen = [];
+          fields.map(function(k) {
+            arrTen.push(<option key={k} value={k}> {k} </option>);
+          })
+            tmpl.setState({
+              optsFields: arrTen
+            });
+        });
       }
-    tmpl.setState({
-      optsFields: arrTen
-    });
-  }
-    var callback = function(res) {
-      job.indexSetName = res.index_prefix;
-      tmpl.setState({ job: job });
-      console.log(client);
-      client.indices.getMapping({index: job.indexSetName+"_0"}, function(error, response) {
-        if (error) {
-          console.log(error);
-          if(error.status === 404) {
-            UserNotification.error("Index not found", job.indexSetName);
-          }
-        } else {
-          console.log(response);
-          cb(response)
-        }
-      });
-    }
-    var failCallback = function(err) {
-      console.log(err);
-    }
-    fetch('GET', url).then(callback, failCallback);
+      var failCallback = function(err) {
+        console.log(err);
+      }
+      fetch('GET', url).then(callback, failCallback);
   },
   _setDateTimeToNow(field) {
     return () => {
@@ -255,16 +255,16 @@ const MachineLearningPage = React.createClass({
     const job = this.state.job;
     var query = {
         "range": {
-          "@timestamp": {
-            "gte": moment(job.startDate).format("YYYY-MM-DD"),
-            "lte": moment(job.endDate).format("YYYY-MM-DD")
+          "timestamp": {
+            "gte": moment(job.startDate).format("YYYY-MM-DD HH:mm:ss.SSS"),
+            "lte": moment(job.endDate).format("YYYY-MM-DD HH:mm:ss.SSS")
           }
         }
     }
     var aggs = {
           bucket_time: {
             "date_histogram": {
-              "field": "@timestamp",
+              "field": "timestamp",
               "interval": this.state.job.bucketSpan,
             },
             aggs: {
@@ -274,11 +274,13 @@ const MachineLearningPage = React.createClass({
           }
         }
         aggs.bucket_time.aggs.server_stats[job.aggrigationType] = {"field": this.state.job.field}
+        console.log(JSON.stringify({query, aggs}));
         client.search({
           index: job.indexSetName+"_0",
           body: {query, aggs}
         }).then(function (resp) {
           var hits = resp.hits.hits;
+          console.log(hits);
           var d =    {
             chartData: {
               labels: [],
@@ -314,8 +316,7 @@ const MachineLearningPage = React.createClass({
           tmpl.setState({ jobs: jobs });
         });
     }
-    // console.log(this.state.job, "before saving");
-    fetch('PUT', "http://localhost:9000/api/plugins/org.graylog.plugins.machinelearning/rules", {job: this.state.job}).then(callback, failCallback);
+    fetch('PUT', URLUtils.qualifyUrl("/plugins/org.graylog.plugins.machinelearning/rules"), {job: this.state.job}).then(callback, failCallback);
   },
   _onDateSelected(field) {
     return (date, _, event) => {

@@ -2,15 +2,15 @@
 import elasticsearch from 'elasticsearch';
 import AggregatesActions from './AggregatesActions';
 
-
+import AppConfig from 'util/AppConfig';
 import CombinedProvider from 'injection/CombinedProvider';
 const { UniversalSearchStore } = CombinedProvider.get('UniversalSearch');
 
 
-// const promise = UniversalSearchStore.search('absolute', '*', searchParams, this.props.stream.id, this.PAGE_SIZE,
-//   page || 1, 'timestamp', 'asc', undefined, false);
+var hostname = AppConfig.gl2ServerUrl().split("9000")[0]+"9200";
+
 const client = new elasticsearch.Client({
-  host: '146.148.61.227:9200'
+  host: hostname,
 });
 
 export default client;

@@ -6,6 +6,7 @@ import AggregatesActions from './AggregatesActions';
 import StreamSelactBox from './StreamSelactBox';
 import RulesList from './RulesList';
 import EditRuleModal from './EditRuleModal';
+import URLUtils from 'util/URLUtils';
 import { IfPermitted, PageHeader } from 'components/common';
 import elasticsearch from 'elasticsearch';
 import fetch from 'logic/rest/FetchProvider';
@@ -13,45 +14,31 @@ import { BootstrapTable, TableHeaderColumn } from 'react-bootstrap-table';
 import * as d3 from "d3";
 import client from 'machinelearning/ElasticSearch'
 
-const MachineLearningPage = React.createClass({
 
+const MachineLearningPage = React.createClass({
   componentDidMount(){
-    let tmpl = this;
-    // var client = new elasticsearch.Client({
-    //   host: '35.193.61.95:9200',
-    //   log: 'trace'
+    // TODO: fix this ASAP
+
+    // AggregatesActions.getJobs2().then(jobData => {
+    //   console.log(jobData);
+    //   // tmpl.setState({ jobs: jobs });
     // });
-    client.search({
-      index: 'anomaly_result',
-      size:10000,
-      body: {
-        query: {
-          "match": {
-            "jobid":  this.props.jobid,
-         }
-        }
-      }
-    }).then(function (resp) {
-    var hits = resp.hits.hits;
-    var res = [];
-    var anom = [];
-    resp.hits.hits.map(function(h) {
-      res.push({date : new Date(h._source.timestamp), close: h._source.actual_value })
-      if(h._source.flag) {
-        anom.push({deviation_expected: h._source.deviation_expected, expected_value: h._source.expected_value ,date : new Date(h._source.timestamp), close: h._source.anoms })
-      }
-      // console.log(anom, "sdfjhsd****888");
-    })
-    tmpl.setState({data: res})
-    tmpl.setState({anmdata: anom})
-}, function (err) {
-    console.trace(err.message);
-});
-// fetch('GET', "http://localhost:9000/api/plugins/org.graylog.plugins.machinelearning/rules").then(function(x) {
-//       tmpl.setState({jobs: x.jobs})
-//   }, function(err) {
-//     console.log(err);
-//   });
+    let tmpl = this;
+    fetch('POST', URLUtils.qualifyUrl("/plugins/org.graylog.plugins.machinelearning/jobs")+ "/" + this.props.jobid).then(function(resp) {
+        var hits = resp.hits.hits;
+        var res = [];
+        var anom = [];
+        resp.hits.hits.map(function(h) {
+          res.push({date : new Date(h._source.timestamp), close: h._source.actual_value })
+          if(h._source.flag) {
+            anom.push({deviation_expected: h._source.deviation_expected, expected_value: h._source.expected_value ,date : new Date(h._source.timestamp), close: h._source.anoms })
+          }
+        })
+        tmpl.setState({data: res})
+        tmpl.setState({anmdata: anom})
+      }, function(err) {
+        console.log(err);
+      });
   },
 
   getInitialState() {
@@ -61,7 +48,6 @@ const MachineLearningPage = React.createClass({
   },
   handelCreatejob(evt) {
     this.setState({showCreateJob: !this.state.showCreateJob})
-
   },
   render() {
     if(this.state.data) {
@@ -77,10 +63,8 @@ const MachineLearningPage = React.createClass({
       var x = d3.scaleTime()
       .rangeRound([0, width]);
 
-
       var y = d3.scaleLinear()
       .rangeRound([height, 0]);
-
 
       var line = d3.line().x(function(d) {  return x(d.date); }).y(function(d) { return y(d.close); });
       x.domain(d3.extent(data, function(d) { return d.date; }));
@@ -113,28 +97,25 @@ const MachineLearningPage = React.createClass({
       	.style("z-index", "10")
       	.style("visibility", "hidden")
       	.text("a simple tooltip");
-if(this.state.anmdata) {
-  g.selectAll(".dot")
-  .data(this.state.anmdata)
-  .enter()
-  .append("circle")
-  .attr("class", "dot")
-  .attr("r", 3.5)
-  .attr("cx", function(d) { return x(d.date); })
-  .attr("cy", function(d) { return y(d.close); })
-  .on("mouseover", function(d){
-    return tooltip.style("visibility", "visible").html("Expected value is: "+d.expected_value + "<br/>"  + "value : "+d.close +"<br/>"  + "deviation is: "+d.deviation_expected)
-  })
-  	.on("mousemove", function(){return tooltip.style("top", (event.pageY-10)+"px").style("left",(event.pageX+10)+"px");})
-  	.on("mouseout", function(){return tooltip.style("visibility", "hidden");});
-
-
+    if(this.state.anmdata) {
+      g.selectAll(".dot")
+        .data(this.state.anmdata)
+        .enter()
+        .append("circle")
+        .attr("class", "dot")
+        .attr("r", 3.5)
+        .attr("cx", function(d) { return x(d.date); })
+        .attr("cy", function(d) { return y(d.close); })
+        .on("mouseover", function(d){
+          return tooltip.style("visibility", "visible").html("Expected value is: "+d.expected_value + "<br/>"  + "value : "+d.close +"<br/>"  + "deviation is: "+d.deviation_expected)
+        })
+      	.on("mousemove", function(){return tooltip.style("top", (event.pageY-10)+"px").style("left",(event.pageX+10)+"px");})
+      	.on("mouseout", function(){return tooltip.style("visibility", "hidden");});
+    }
 }
-}
-
-    return (
-      <svg width="960" height="500"></svg>
-    );
+  return (
+    <svg width="960" height="500"></svg>
+  );
   },
 });
 

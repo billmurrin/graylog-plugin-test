@@ -5,6 +5,7 @@ import org.graylog.plugins.machinelearning.job.JobServiceImpl;
 import org.graylog.plugins.machinelearning.job.RuleService;
 import org.graylog.plugins.machinelearning.job.RuleServiceImpl;
 import org.graylog.plugins.machinelearning.job.rest.JobActions;
+import org.graylog.plugins.machinelearning.job.rest.JobResource;
 import org.graylog.plugins.machinelearning.job.rest.RuleResource;
 import org.graylog2.plugin.PluginConfigBean;
 import org.graylog2.plugin.PluginModule;
@@ -29,7 +30,7 @@ public class MachinelearningModule extends PluginModule {
     @Override
     protected void configure() {
 //        bind(AlertService.class).to(AlertServiceImpl.class);
-    	bind(RuleService.class).to(RuleServiceImpl.class);
+//    	bind(RuleService.class).to(RuleServiceImpl.class);
         bind(JobService.class).to(JobServiceImpl.class);
 
 
@@ -45,6 +46,7 @@ public class MachinelearningModule extends PluginModule {
 //        addPermissions(ReportScheduleRestPermissions.class);
             addRestResource(RuleResource.class);
             addRestResource(JobActions.class);
+            addRestResource(JobResource.class);
 //        addRestResource(ReportScheduleResource.class);
         //addRestResource(TestRest.class);
 

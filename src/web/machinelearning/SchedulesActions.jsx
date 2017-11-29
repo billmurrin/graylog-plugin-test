@@ -5,6 +5,7 @@ const SchedulesActions = Reflux.createActions({
   create: { asyncResult: true },
   delete: { asyncResult: true },
   update: { asyncResult: true },
+  getFields: { asyncResult: true },
 });
 
 export default SchedulesActions;
