@@ -5,13 +5,14 @@ import packageJson from '../../package.json'
 import { PluginManifest, PluginStore } from 'graylog-web-plugin/plugin'
 
 import MachineLearningPage from 'machinelearning/MachineLearningPage'
+import MachineLearningStartPage from 'machinelearning/component/MachineLearningStartPage'
 import GraphPage from 'machinelearning/GraphPage'
 import SchedulesPage from 'machinelearning/SchedulesPage'
 
 const manifest = new PluginManifest(packageJson, {
 
   routes: [
-    { path: '/machineLearning', component: MachineLearningPage },
+    { path: '/machineLearning', component: MachineLearningStartPage },
   ],
 
   navigation: [

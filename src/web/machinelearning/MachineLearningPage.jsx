@@ -253,56 +253,72 @@ const MachineLearningPage = React.createClass({
   showGraph(){
     let tmpl = this;
     const job = this.state.job;
-    var query = {
-        "range": {
-          "timestamp": {
-            "gte": moment(job.startDate).format("YYYY-MM-DD HH:mm:ss.SSS"),
-            "lte": moment(job.endDate).format("YYYY-MM-DD HH:mm:ss.SSS")
-          }
-        }
-    }
-    var aggs = {
-          bucket_time: {
-            "date_histogram": {
-              "field": "timestamp",
-              "interval": this.state.job.bucketSpan,
-            },
-            aggs: {
-              "server_stats": {
-              }
-            }
-          }
-        }
-        aggs.bucket_time.aggs.server_stats[job.aggrigationType] = {"field": this.state.job.field}
-        console.log(JSON.stringify({query, aggs}));
-        client.search({
-          index: job.indexSetName+"_0",
-          body: {query, aggs}
-        }).then(function (resp) {
-          var hits = resp.hits.hits;
-          console.log(hits);
-          var d =    {
-            chartData: {
-              labels: [],
-              datasets: [
-                {
-                  fillColor: "#25BDFF",
-                  strokeColor: "#25BDFF",
-                  data: []
-                }
-              ]
-            }}
-            resp.aggregations.bucket_time.buckets.map(function(b) {
-              d.chartData.labels.push(moment(b.key_as_string).format("YYYY-MM-DD"))
-              d.chartData.datasets[0].data.push(b.server_stats.value)
-            })
-            tmpl.setState({rawData:resp.aggregations.bucket_time.buckets});
-            tmpl.setState({chartData:d.chartData})
-            tmpl.setState({showLine:true})
-          }, function (err) {
-            // console.trace(err.message);
-          });
-        this.setState({graphDisplayed: true})
+   var result =
+        {
+           "elastic_index_name": "anomaly_result"+"*",
+           "start_date": "2015-01-01 18:00:00",
+           "end_date": "2018-01-01 18:00:00",
+           "field_name": "response",
+           "query_size": 1212,
+           "time_stamp_field":"timestamp"
+         }
+fetch('POST', "http://localhost:9000/api/plugins/org.graylog.plugins.machinelearning/jobs/fields/cvc", result).then(function(r) {
+  console.log(r+ "result************8");
+
+}, function(er) {
+  console.log(er);
+
+});
+    // var query = {
+    //     "range": {
+    //       "timestamp": {
+    //         "gte": moment(job.startDate).format("YYYY-MM-DD HH:mm:ss.SSS"),
+    //         "lte": moment(job.endDate).format("YYYY-MM-DD HH:mm:ss.SSS")
+    //       }
+    //     }
+    // }
+    // var aggs = {
+    //       bucket_time: {
+    //         "date_histogram": {
+    //           "field": "timestamp",
+    //           "interval": this.state.job.bucketSpan,
+    //         },
+    //         aggs: {
+    //           "server_stats": {
+    //           }
+    //         }
+    //       }
+    //     }
+    //     aggs.bucket_time.aggs.server_stats[job.aggrigationType] = {"field": this.state.job.field}
+    //     console.log(JSON.stringify({query, aggs}));
+    //     client.search({
+    //       index: job.indexSetName+"_0",
+    //       body: {query, aggs}
+    //     }).then(function (resp) {
+    //       var hits = resp.hits.hits;
+    //       console.log(hits);
+    //       var d =    {
+    //         chartData: {
+    //           labels: [],
+    //           datasets: [
+    //             {
+    //               fillColor: "#25BDFF",
+    //               strokeColor: "#25BDFF",
+    //               data: []
+    //             }
+    //           ]
+    //         }}
+    //         resp.aggregations.bucket_time.buckets.map(function(b) {
+    //           d.chartData.labels.push(moment(b.key_as_string).format("YYYY-MM-DD"))
+    //           d.chartData.datasets[0].data.push(b.server_stats.value)
+    //         })
+    //         tmpl.setState({rawData:resp.aggregations.bucket_time.buckets});
+    //         tmpl.setState({chartData:d.chartData})
+    //         tmpl.setState({showLine:true})
+    //       }, function (err) {
+    //         // console.trace(err.message);
+    //       });
+        // this.setState({graphDisplayed: true})
         return;
   },
   _save(){

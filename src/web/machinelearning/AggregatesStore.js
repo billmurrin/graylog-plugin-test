@@ -24,9 +24,7 @@ const AggregatesStore = Reflux.createStore({
       .then(
         response => {
           console.log(response);
-     // this.jobs = response.jobs;
-          // this.trigger({ jobs: this.jobs });
-          return response;
+            return response;
         },
         error => {
           UserNotification.error(`Fetching aggregate rules failed with status: ${error}`,
@@ -34,7 +32,7 @@ const AggregatesStore = Reflux.createStore({
         });
     AggregatesActions.getFields.promise(promise);
   },
-  getJobs(){
+  getJobs(jobType){
     const promise = fetch('GET', URLUtils.qualifyUrl(this.sourceUrl))
       .then(
         response => {
