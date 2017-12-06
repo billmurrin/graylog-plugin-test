@@ -14,24 +14,19 @@ import fetch from 'logic/rest/FetchProvider';
 import { BootstrapTable, TableHeaderColumn } from 'react-bootstrap-table';
 import "machinelearning/style.css"
 import GraphPage from 'machinelearning/GraphPage'
+import CreateJobForm from './CreateJobForm'
 import client from 'machinelearning/ElasticSearch'
 import ViewGraph from 'machinelearning/ViewGraph'
 import BootstrapModalForm from 'components/bootstrap/BootstrapModalForm';
 import Input from 'components/bootstrap/Input';
 import moment from 'moment';
 import { DataTable } from 'components/common';
-import { Line } from "react-chartjs";
 import UserNotification from 'util/UserNotification';
 import URLUtils from 'util/URLUtils';
-
 import Reflux from 'reflux';
-import AggregatesStore from 'machinelearning/AggregatesStore';
-
-
 import StoreProvider from 'injection/StoreProvider';
 const StreamsStore = StoreProvider.getStore('Streams');
 const CurrentUserStore = StoreProvider.getStore('CurrentUser');
-
 import CombinedProvider from 'injection/CombinedProvider';
 const { AlertNotificationsStore } = CombinedProvider.get('AlertNotifications');
 
@@ -73,6 +68,7 @@ const JobsDisplay = React.createClass({
       <td className="limited">{job.jobType}</td>
       <td>{actions}</td>
       </tr>
+
     );
   },
   _isValidDateString(dateString) {
@@ -101,10 +97,15 @@ const JobsDisplay = React.createClass({
 
     return formattedHeaderCell;
   },
-
+  showCreateJobForm(){
+      this.setState({ createJobForm: !this.state.createJobForm });
+  },
+testit(){
+  this.setState({test: true})
+},
 
   render() {
-
+    console.log(this.state);
     if(!this.props.jobType) {
       return null
     }
@@ -112,32 +113,42 @@ const JobsDisplay = React.createClass({
       let tmpl = this;
       let showCreateJob = null;
       let jobs = null;
-      let jobsdetails = null;
+      let dispContent = null;
       let table = null;
       let chart = null;
       const filterKeys = ['jobid','field', 'aggrigationType'];
       const headers = ['Aggrigation Type', 'Start Date', 'EndDate', 'Field', 'Job Id', 'Job Type'];
-      jobsdetails = (
+      if(this.state.createJobForm) {
+        dispContent = (
+            <CreateJobForm test={12121} />
+        );
+      }
+      else {
+        dispContent = (
           <DataTable id="job-list"
-            className="table-hover"
-            headers={headers}
-            headerCellFormatter={this._headerCellFormatter}
-            rows={this.state.jobs}
-            filterBy="field"
-            dataRowFormatter={this._ruleInfoFormatter}
-            filterLabel="Filter Jobs"
-            filterKeys={filterKeys}/>
-        )
+          className="table-hover"
+          headers={headers}
+          headerCellFormatter={this._headerCellFormatter}
+          rows={this.state.jobs}
+          filterBy="field"
+          dataRowFormatter={this._ruleInfoFormatter}
+          filterLabel="Filter Jobs"
+          filterKeys={filterKeys}/>
+        );
+      }
+
+
         return (
           <div>
+          <Button className="buttonColor buttonBg" onClick={this.showCreateJobForm}>Create Job </Button>
             <PageHeader>
-              <Button className="buttonColor buttonBg" onClick={this.openModal}>Create Job </Button>
-              <span>
-                create diffent type of jobs 
-              </span>
+                <div>
+                  {dispContent}
+                </div>
+                <div id="graph"></div>
             </PageHeader>
             <PageHeader>
-              {jobsdetails}
+              <ViewGraph jobid={"dsfdsf"}/>
             </PageHeader>
           </div>
         );

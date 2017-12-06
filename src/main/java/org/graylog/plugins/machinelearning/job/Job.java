@@ -3,7 +3,7 @@ package org.graylog.plugins.machinelearning.job;
 
 public interface Job {
 
-    public String getAggrigationType();
+    public String getAggregationType();
 
     public String getField();
 

@@ -34,7 +34,7 @@ public class JobServiceImpl implements JobService {
         final String collectionName = JobImpl.class.getAnnotation(CollectionName.class).value();
         final DBCollection dbCollection = mongoConnection.getDatabase().getCollection(collectionName);
         this.coll = JacksonDBCollection.wrap(dbCollection, JobImpl.class, String.class, mapperProvider.get());
-        //this.coll.createIndex(new BasicDBObject("jobid", 1), new BasicDBObject("unique", true));
+        this.coll.createIndex(new BasicDBObject("jobid", 1), new BasicDBObject("unique", true));
 
 
     }
@@ -74,7 +74,7 @@ public class JobServiceImpl implements JobService {
 
     @Override
     public Job fromRequest(AddJobRequest request) {
-          return JobImpl.create(request.getJob().getAggrigationType(), request.getJob().getField(), request.getJob().getStartDate(), request.getJob().getEndDate(), request.getJob().getStreamName(), request.getJob().getJobid(), request.getJob().getBucketSpan(), request.getJob().getIndexSetName(), request.getJob().getJobType());
+          return JobImpl.create(request.getJob().getAggregationType(), request.getJob().getField(), request.getJob().getStartDate(), request.getJob().getEndDate(), request.getJob().getStreamName(), request.getJob().getJobid(), request.getJob().getBucketSpan(), request.getJob().getIndexSetName(), request.getJob().getJobType());
     }
 
     private List<Job> toAbstractListType(DBCursor<JobImpl> job) {

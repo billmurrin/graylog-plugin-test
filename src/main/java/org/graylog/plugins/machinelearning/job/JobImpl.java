@@ -18,10 +18,10 @@ import com.google.auto.value.AutoValue;
 public abstract class JobImpl implements Job{
 
 
-    @JsonProperty("aggrigationType")
+    @JsonProperty("aggregationType")
     @Override
     @NotNull
-    public abstract String getAggrigationType();
+    public abstract String getAggregationType();
 
     @JsonProperty("field")
     @Override
@@ -70,7 +70,7 @@ public abstract class JobImpl implements Job{
     public abstract String getJobType();
 
     @JsonCreator
-    public static JobImpl create( @JsonProperty("aggrigationType") String aggrigationType,
+    public static JobImpl create( @JsonProperty("aggregationType") String aggregationType,
                                   @JsonProperty("field") String field,
                                   @JsonProperty("startDate") String startDate,
                                   @JsonProperty("endDate") String endDate,
@@ -80,7 +80,7 @@ public abstract class JobImpl implements Job{
                                   @JsonProperty("indexSetName") String  indexSetName,
                                   @JsonProperty("jobType") String  jobType
                                   ) {
-        return new AutoValue_JobImpl(aggrigationType, field, startDate, endDate, streamName, jobid, bucketSpan, indexSetName, jobType);
+        return new AutoValue_JobImpl(aggregationType, field, startDate, endDate, streamName, jobid, bucketSpan, indexSetName, jobType);
     }
 
 

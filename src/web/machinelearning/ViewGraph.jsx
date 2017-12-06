@@ -24,7 +24,15 @@ const MachineLearningPage = React.createClass({
     //   // tmpl.setState({ jobs: jobs });
     // });
     let tmpl = this;
-    fetch('POST', URLUtils.qualifyUrl("/plugins/org.graylog.plugins.machinelearning/jobs")+ "/" + this.props.jobid).then(function(resp) {
+
+    var obj = {
+       "jobid": this.props.jobid,
+        "query_size": 10000,
+        "elastic_index_name": "anomaly_result",
+        "start_date": "2015-01-01 18:00:00",
+        "end_date": "2018-01-01 18:00:00",
+        }
+    fetch('POST', URLUtils.qualifyUrl("/plugins/org.graylog.plugins.machinelearning/jobs/getjobDetails"), obj).then(function(resp) {
         var hits = resp.hits.hits;
         var res = [];
         var anom = [];

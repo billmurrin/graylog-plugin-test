@@ -26,7 +26,9 @@ const MachineLearningStartPage = React.createClass({
         {code: "forcasting", name: "Forcasting"}
       ].map(function(j) {
         jobTabs.push(
-              <Button id={j.code} onClick={tmpl._handelClick} className="col-sm-4" key={j.code} bsStyle="primary" bsSize="large">{j.name}</Button>
+            <div className="col-sm-3" >
+                <Button id={j.code} onClick={tmpl._handelClick}  key={j.code} bsStyle="primary" bsSize="large">{j.name}</Button>
+            </div>
         )
     })
       return (

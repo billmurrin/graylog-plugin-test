@@ -15,6 +15,7 @@ public abstract class JobConfiguration {
     public abstract String jobid();
 
     @JsonProperty("field_name")
+    @Nullable
     @ObjectId
     public abstract String fieldName();
 

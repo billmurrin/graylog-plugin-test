@@ -51,6 +51,8 @@ import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormat;
 
 import java.io.UnsupportedEncodingException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 import static com.google.common.base.Strings.isNullOrEmpty;
@@ -129,7 +131,6 @@ public class JobResource extends RestResource implements PluginRestResource {
                             @Valid @NotNull JobConfiguration obj
     ) throws NotFoundException, MongoException, UnsupportedEncodingException {
         try {
-
 
             final AbsoluteRange range1 = AbsoluteRange.create(obj.startDate(), obj.endDate());
             String query= "jobid:"+obj.jobid();
@@ -233,7 +234,7 @@ public class JobResource extends RestResource implements PluginRestResource {
     })
     public Response getDataString(@ApiParam(name = "JSON body", required = true)
                                   @Valid @NotNull GraphConfigurations obj
-    ) throws ElasticsearchException {
+    ) throws ElasticsearchException, ParseException {
         try {
 
             DateTime start = DateTime.parse(obj.startDate(),DateTimeFormat.forPattern("YYYY-MM-DD HH:mm:ss"));
@@ -259,8 +260,9 @@ public class JobResource extends RestResource implements PluginRestResource {
 
             final String query = searchSource()
                     .aggregation(builder)
-                    .size(obj.querySize())
+                    .size(10)
                     .toString();
+            System.out.println(query+ "**********************88");
 
             final Search request = new Search.Builder(query)
                     .addIndex(obj.elasticIndexName())
@@ -275,9 +277,16 @@ public class JobResource extends RestResource implements PluginRestResource {
 
             terms = filterAggregation.getTermsAggregation("gl2_histogram").getBuckets().stream()
                     .map(e -> {
+                        Date date1 = null;
+                        try {
+                            date1=new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").parse(e.getKeyAsString());
+                        }catch (ParseException e1) {
+                            e1.printStackTrace();
+                        }
+
                         final Map<String, Object> resultMap = Maps.newHashMap();
                         resultMap.put("key_field", e.getKey());
-                        resultMap.put("dateString", e.getKeyAsString());
+                        resultMap.put("date", date1);
                         resultMap.put("count", e.getCount());
                         final StatsAggregation stats = e.getStatsAggregation(Searches.AGG_STATS);
                         resultMap.put("min", stats.getMin());

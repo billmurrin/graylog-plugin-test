@@ -255,13 +255,14 @@ const MachineLearningPage = React.createClass({
     const job = this.state.job;
    var result =
         {
-           "elastic_index_name": "anomaly_result"+"*",
+           "elastic_index_name": job.indexSetName+"*",
            "start_date": "2015-01-01 18:00:00",
            "end_date": "2018-01-01 18:00:00",
            "field_name": "response",
            "query_size": 1212,
            "time_stamp_field":"timestamp"
          }
+console.log(re);
 fetch('POST', "http://localhost:9000/api/plugins/org.graylog.plugins.machinelearning/jobs/fields/cvc", result).then(function(r) {
   console.log(r+ "result************8");
 
@@ -399,7 +400,6 @@ fetch('POST', "http://localhost:9000/api/plugins/org.graylog.plugins.machinelear
             )
       }
       if(this.state.showLine) {
-        // console.log(this.state.chartData);
         chart = (<Line data={this.state.chartData} options={chartOptions} width="1100" height="540" />);
       }
       return (
