@@ -11,12 +11,10 @@ import MachinelearningActions from './MachinelearningActions';
 import RulesList from './RulesList';
 import EditRuleModal from './EditRuleModal';
 import { IfPermitted, PageHeader } from 'components/common';
-import elasticsearch from 'elasticsearch';
 import fetch from 'logic/rest/FetchProvider';
 import { BootstrapTable, TableHeaderColumn } from 'react-bootstrap-table';
 import "./style.css"
 import GraphPage from 'machinelearning/GraphPage'
-import client from 'machinelearning/ElasticSearch'
 import ViewGraph from 'machinelearning/ViewGraph'
 import BootstrapModalForm from 'components/bootstrap/BootstrapModalForm';
 import Input from 'components/bootstrap/Input';

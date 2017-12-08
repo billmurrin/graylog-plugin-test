@@ -141,6 +141,7 @@ const CreateJobForm = React.createClass({
       console.log("errorThrown", errorThrown)
     };
     var callback = function(k) {
+      tmpl.props.handelState("showJobs")
       AggregatesActions.getJobs().then(jobs => {
         tmpl.setState({ jobs: jobs });
       });
@@ -198,14 +199,16 @@ const CreateJobForm = React.createClass({
 
     var data =   {
       "elastic_index_name": job.indexSetName+ "*",
-      "start_date": moment(job.startDate).format("YYYY-MM-DD HH:mm:ss"),
-      "end_date": moment(job.endDate).format("YYYY-MM-DD HH:mm:ss"),
+      "start_date": moment(job.startDate).format("YYYY-MM-DD HH:mm:ss.SSS"),
+      "end_date": moment(job.endDate).format("YYYY-MM-DD HH:mm:ss.SSS"),
       "field_name": job.field,
       "query_size": 100,
-      "time_stamp_field":"@timestamp"
+      "time_stamp_field":"timestamp"
     }
+    console.log(data);  
     var callback = function(res) {
       $("#graph svg").remove()
+      console.log(res , "result data**********88");
       tmpl._createGraph(res);
     }
     var failCallback = function(err) {
@@ -217,158 +220,104 @@ const CreateJobForm = React.createClass({
   },
   _createGraph(data){
 
-    var svg = d3.select("svg"),
-        margin = {top: 20, right: 20, bottom: 30, left: 50},
-        width = +svg.attr("width") - margin.left - margin.right,
-        height = +svg.attr("height") - margin.top - margin.bottom,
-        g = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+    function mapDate(d) {
+      return new Date(d.date);
+    }
+    var aggregationType = "avg";
+    function mapValue(d) {
+      switch (aggregationType) {
+        case "min":
+        case "max":
+        return d[aggregationType];
+        break;
 
-    var parseTime = d3.timeParse("%Y-%m-%dT%H:%M:%S");
+        case "sum":
+        return d.total;
+        break
 
-    var x = d3.scaleTime()
-        .rangeRound([0, width]);
+        case "avg":
+        return d.mean;
+        break
+      }
+    }
 
-    var y = d3.scaleLinear()
-        .rangeRound([height, 0]);
-console.log(data);
-    var line = d3.line()
-        .x(function(d) { return x(d.date); })
-        .y(function(d) { return y(d.close); });
+    const margin = {
+      top: 30,
+      right: 40,
+      bottom: 30,
+      left: 40,
+    };
 
-      data.forEach(function(d) {
+    const svgWidth = 1200;
+    const svgHeight = 500;
+    const width = svgWidth - margin.left - margin.right;
+    const height = svgHeight - margin.top - margin.bottom;
 
-        d.date = parseTime(d.date);
-        d.close = +d.close;
-        return d;
-      })
-      x.domain(d3.extent(data, function(d) { return d.date; }));
-      y.domain(d3.extent(data, function(d) { return d.close; }));
-      g.append("g")
-          .attr("transform", "translate(0," + height + ")")
-          .call(d3.axisBottom(x))
-        .select(".domain")
-          .remove();
+    const svg = d3.select("#graph")
+    .append("svg")
+    .attr("width", svgWidth)
+    .attr("height", svgHeight)
+    .append("g")
+    .attr("transform", `translate(${margin.left}, ${margin.top})`);
 
-      g.append("g")
-          .call(d3.axisLeft(y))
-        .append("text")
-          .attr("fill", "#000")
-          .attr("transform", "rotate(-90)")
-          .attr("y", 6)
-          .attr("dy", "0.71em")
-          .attr("text-anchor", "end")
-          .text("Price ($)");
 
-      g.append("path")
-          .datum(data)
-          .attr("fill", "none")
-          .attr("stroke", "steelblue")
-          .attr("stroke-linejoin", "round")
-          .attr("stroke-linecap", "round")
-          .attr("stroke-width", 1.5)
-          .attr("d", line);
-    // function mapDate(d) {
-    //   return new Date(d.date);
-    // }
-    // var aggregationType = "avg";
-    // function mapValue(d) {
-    //   switch (aggregationType) {
-    //     case "min":
-    //     case "max":
-    //     return d[aggregationType];
-    //     break;
-    //
-    //     case "sum":
-    //     return d.total;
-    //     break
-    //
-    //     case "avg":
-    //     return d.mean;
-    //     break
-    //   }
-    // }
-    //
-    // const margin = {
-    //   top: 30,
-    //   right: 40,
-    //   bottom: 30,
-    //   left: 40,
-    // };
-    //
-    //
-    // const svgWidth = 1200;
-    // const svgHeight = 500;
-    // const width = svgWidth - margin.left - margin.right;
-    // const height = svgHeight - margin.top - margin.bottom;
-    //
-    // const svg = d3.select("#graph")
-    // .append("svg")
-    // .attr("width", svgWidth)
-    // .attr("height", svgHeight)
-    // .append("g")
-    // .attr("transform", `translate(${margin.left}, ${margin.top})`);
-    //
-    //
-    // const xScale = d3.scaleTime()
-    // .domain([d3.min(data, mapDate), d3.max(data, mapDate)])
-    // .range([0, width]);
-    //
-    // const yScale = d3.scaleLinear()
-    // .domain([d3.min(data, mapValue), d3.max(data, mapValue)*1.05])
-    // .range([height, 0]);
-    //
-    // const xAxis = d3.axisBottom()
-    // .scale(xScale)
-    // .ticks(3);
-    //
-    // const yAxis = d3.axisLeft()
-    // .scale(yScale)
-    // .ticks(3);
-    //
-    // const gX = svg
-    // .append("g")
-    // .attr("class", "xAxis")
-    // .attr("transform", `translate(0, ${height})`)
-    // .call(xAxis);
-    //
-    // const gY = svg
-    // .append("g")
-    // .attr("class", "yAxis")
-    // .call(yAxis);
-    //
-    // svg.append("rect")
-    // .attr("fill", "transparent")
-    // .attr("width", width)
-    // .attr("height", height);
-    //
-    // const valueLine = d3
-    // .line()
-    // .x((d) => xScale(mapDate(d)))
-    // .y((d) => yScale(mapValue(d)));
-    //
-    // const valuePath = svg
-    // .append("path")
-    // .data([data])
-    // .attr("class", "line")
-    // .attr("d", valueLine);
-    //
-    //
-    // function zoomed() {
-    //   const transform = d3.event.transform;
-    //   console.log(transform.x);
-    //   const xNewScale = transform.rescaleX(xScale);
-    //   xAxis.scale(xNewScale);
-    //   gX.call(xAxis);
-    //
-    //   valueLine.x((d) => xNewScale(mapDate(d)));
-    //   valuePath.attr("d", valueLine);
-    // }
-    // const zoom = d3.zoom()
-    // .scaleExtent([1, 40])
-    // .translateExtent([[0,0], [width, height]])
-    // .on("zoom", zoomed);
-    //
-    // svg.call(zoom);
+    const xScale = d3.scaleTime()
+    .domain([d3.min(data, mapDate), d3.max(data, mapDate)])
+    .range([0, width]);
+
+    const yScale = d3.scaleLinear()
+    .domain([d3.min(data, mapValue), d3.max(data, mapValue)*1.05])
+    .range([height, 0]);
+
+    const xAxis = d3.axisBottom()
+    .scale(xScale)
+    .ticks(3);
+
+    const yAxis = d3.axisLeft()
+    .scale(yScale)
+    .ticks(3);
+
+    const gX = svg
+    .append("g")
+    .attr("class", "xAxis")
+    .attr("transform", `translate(0, ${height})`)
+    .call(xAxis);
+
+    const gY = svg
+    .append("g")
+    .attr("class", "yAxis")
+    .call(yAxis);
+
+    svg.append("rect")
+    .attr("fill", "transparent")
+    .attr("width", width)
+    .attr("height", height);
+
+    const valueLine = d3
+    .line()
+    .x((d) => xScale(mapDate(d)))
+    .y((d) => yScale(mapValue(d)));
+
+    const valuePath = svg
+    .append("path")
+    .data([data])
+    .attr("class", "line")
+    .attr("d", valueLine);
+
+
+    function zoomed() {
+      const transform = d3.event.transform;
+      const xNewScale = transform.rescaleX(xScale);
+      xAxis.scale(xNewScale);
+      gX.call(xAxis);
+      valueLine.x((d) => xNewScale(mapDate(d)));
+      valuePath.attr("d", valueLine);
+    }
+    const zoom = d3.zoom()
+    .scaleExtent([1, 40])
+    .translateExtent([[0,0], [width, height]])
+    .on("zoom", zoomed);
+     svg.call(zoom);
   },
   handelStreamChange(evt){
     let tmpl = this;
@@ -398,11 +347,7 @@ console.log(data);
     fetch('GET', url).then(callback, failCallback);
   },
   render() {
-    let chart = null;
-    if(this.state.chartData) {
-      // console.log(this.state.chartData);
-      chart = (<Line data={this.state.chartData} options={chartOptions} width="1100" height="540" />);
-    }
+console.log(this.props);
     return (
       <div>
       <Form state={this.state} onChange={state => this.setState(state)}>
@@ -453,36 +398,36 @@ console.log(data);
       </Input>
       </Col>
       <Col sm={6}>
-      <div className="row no-bm" style={{ marginLeft: 50 }}>
-      <div className="col-md-6" style={{ padding: 0 }}>
-      <DatePicker id="searchFromDatePicker"
-      title="Search start date"
-      onChange={this._onDateSelected('startDate')} className="form-control">
-      <Input type="text"
-      ref="startDateFormatted"
-      onChange={this._rangeParamsChanged('startDate')}
-      placeholder={DateTime.Formats.DATETIME}
-      label="Start"
-      buttonAfter={<Button bsSize="small" onClick={this._setDateTimeToNow('startDate')}><i className="fa fa-magic" /></Button>}
-      bsSize="small"
-      required />
-      </DatePicker>
-      </div>
-      <div className="col-md-6" style={{ padding: 0 }}>
-      <DatePicker id="searchToDatePicker"
-      title="Search End date"
-      onChange={this._onDateSelected('endDate')} className="form-control">
-      <Input type="text"
-      ref="endDateFormatted"
-      labelClassName="col-sm-2"
-      label="End"
-      onChange={this._rangeParamsChanged('endDate')}
-      placeholder={DateTime.Formats.DATETIME}
-      buttonAfter={<Button bsSize="small" onClick={this._setDateTimeToNow('startDate')}><i className="fa fa-magic" /></Button>}
-      bsSize="small"
-      required />
-      </DatePicker>
-      </div>
+        <div className="row no-bm" style={{ marginLeft: 50 }}>
+          <div className="col-md-6" style={{ padding: 0 }}>
+            <DatePicker id="searchFromDatePicker"
+            title="Search start date"
+            onChange={this._onDateSelected('startDate')} className="form-control">
+            <Input type="text"
+            ref="startDateFormatted"
+            onChange={this._rangeParamsChanged('startDate')}
+            placeholder={DateTime.Formats.DATETIME}
+            label="Start"
+            buttonAfter={<Button bsSize="small" onClick={this._setDateTimeToNow('startDate')}><i className="fa fa-magic" /></Button>}
+            bsSize="small"
+            required />
+            </DatePicker>
+        </div>
+        <div className="col-md-6" style={{ padding: 0 }}>
+          <DatePicker id="searchToDatePicker"
+          title="Search End date"
+          onChange={this._onDateSelected('endDate')} className="form-control">
+          <Input type="text"
+          ref="endDateFormatted"
+          labelClassName="col-sm-2"
+          label="End"
+          onChange={this._rangeParamsChanged('endDate')}
+          placeholder={DateTime.Formats.DATETIME}
+          buttonAfter={<Button bsSize="small" onClick={this._setDateTimeToNow('startDate')}><i className="fa fa-magic" /></Button>}
+          bsSize="small"
+          required />
+          </DatePicker>
+        </div>
       </div>
 
       </Col>
@@ -495,9 +440,6 @@ console.log(data);
       <button onClick={this._save} id="save-job" type="button" className="btn btn-xs btn-primary pull-right" title="save job">
       Save Job
       </button>
-      </Col>
-      <Col sm={2}>
-      {chart}
       </Col>
       </Row>
       </fieldset>

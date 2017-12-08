@@ -21,10 +21,12 @@ public abstract class JobConfiguration {
 
     @JsonProperty("start_date")
     @ObjectId
+    @Nullable
     public abstract String startDate();
 
     @JsonProperty("end_date")
     @ObjectId
+    @Nullable
     public abstract String endDate();
 
     @JsonProperty("query_size")
@@ -44,6 +46,7 @@ public abstract class JobConfiguration {
 
     @JsonProperty("query_timestamp_field")
     @ObjectId
+    @Nullable
     public abstract String queryTimestampField();
 
     @JsonCreator

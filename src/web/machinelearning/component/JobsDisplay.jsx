@@ -9,13 +9,11 @@ import AggregatesActions from 'machinelearning/AggregatesActions';
 import MachinelearningActions from 'machinelearning/MachinelearningActions';
 // import StreamSelactBox from './StreamSelac
 import { IfPermitted, PageHeader } from 'components/common';
-import elasticsearch from 'elasticsearch';
 import fetch from 'logic/rest/FetchProvider';
 import { BootstrapTable, TableHeaderColumn } from 'react-bootstrap-table';
 import "machinelearning/style.css"
 import GraphPage from 'machinelearning/GraphPage'
 import CreateJobForm from './CreateJobForm'
-import client from 'machinelearning/ElasticSearch'
 import ViewGraph from 'machinelearning/ViewGraph'
 import BootstrapModalForm from 'components/bootstrap/BootstrapModalForm';
 import Input from 'components/bootstrap/Input';
@@ -60,7 +58,7 @@ const JobsDisplay = React.createClass({
     );
     return (
       <tr key={job.jobid}>
-      <td className="limited">{job.aggrigationType}</td>
+      <td className="limited">{job.aggregationType}</td>
       <td className="limited">{job.startDate}</td>
       <td className="limited">{job.endDate}</td>
       <td className="limited">{job.field}</td>
@@ -100,12 +98,59 @@ const JobsDisplay = React.createClass({
   showCreateJobForm(){
       this.setState({ createJobForm: !this.state.createJobForm });
   },
-testit(){
-  this.setState({test: true})
+ handler(state) {
+
+   switch (state) {
+     case "showJobs":
+     this.setState({createJobForm: false })
+       break;
+     case "showCreateJob":
+     this.setState({createJobForm: true })
+       break;
+     case "closeGraphDetails":
+     this.setState({viewGraphContent: false })
+     this.setState({createJobForm: false })
+       break;
+     default:
+
+   }
+   console.log(this.state);
+},
+ _viewjob(evt) {
+   this.setState({viewGraphContent: true })
+   this.setState({currentJobId:evt.currentTarget.id})
+},
+ _startjob(evt) {
+   console.log(this.state);
+   console.log(this.state.jobs);
+   console.log(this.state.jobs[this.state.jobs.findIndex(x => x.jobid==evt.currentTarget.id)]);
+   var job =this.state.jobs[this.state.jobs.findIndex(x => x.jobid==evt.currentTarget.id)];
+
+   var obj = {
+     "host_ip" : "localhost",
+     "jobid" : job.jobid,
+     "aggregationType" : job.aggregationType,
+     "field" : job.field,
+     "startDate" : job.startDate,
+     "end_date" : job.endDate,
+     "bucketSpan" : job.bucketSpan,
+     "indexSetName" : job.indexSetName,
+     "sourceindextype" : "message",
+     "timestampfield" : "timestamp",
+     "anom_index" : "anomaly_result",
+     "anom_type" : "anomaly_type",
+     "anomaly_direction" : "both",
+     "max_ratio_of_anomaly" : "0.02",
+     "alpha_parameter" : "0.1"
+   }
+
+console.log(obj ," starting obj");
+   AggregatesActions.startJob(obj).then(response => {
+     console.log(response);
+   });
 },
 
   render() {
-    console.log(this.state);
     if(!this.props.jobType) {
       return null
     }
@@ -116,27 +161,35 @@ testit(){
       let dispContent = null;
       let table = null;
       let chart = null;
+
       const filterKeys = ['jobid','field', 'aggrigationType'];
       const headers = ['Aggrigation Type', 'Start Date', 'EndDate', 'Field', 'Job Id', 'Job Type'];
-      if(this.state.createJobForm) {
-        dispContent = (
-            <CreateJobForm test={12121} />
-        );
+      if(this.state.viewGraphContent) {
+          dispContent = ( <ViewGraph jobid={this.state.currentJobId} handler={this.handler}/> )
       }
       else {
-        dispContent = (
-          <DataTable id="job-list"
-          className="table-hover"
-          headers={headers}
-          headerCellFormatter={this._headerCellFormatter}
-          rows={this.state.jobs}
-          filterBy="field"
-          dataRowFormatter={this._ruleInfoFormatter}
-          filterLabel="Filter Jobs"
-          filterKeys={filterKeys}/>
-        );
+          if(this.state.createJobForm ) {
+            dispContent = (
+              <div>
+                <CreateJobForm handelState={tmpl.handler} />
+                <div id="graph"></div>
+              </div>
+            );
+          }
+          else {
+            dispContent = (
+              <DataTable id="job-list"
+              className="table-hover"
+              headers={headers}
+              headerCellFormatter={this._headerCellFormatter}
+              rows={this.state.jobs}
+              filterBy="field"
+              dataRowFormatter={this._ruleInfoFormatter}
+              filterLabel="Filter Jobs"
+              filterKeys={filterKeys}/>
+            );
+          }
       }
-
 
         return (
           <div>
@@ -145,10 +198,6 @@ testit(){
                 <div>
                   {dispContent}
                 </div>
-                <div id="graph"></div>
-            </PageHeader>
-            <PageHeader>
-              <ViewGraph jobid={"dsfdsf"}/>
             </PageHeader>
           </div>
         );

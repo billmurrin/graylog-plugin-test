@@ -1,10 +1,10 @@
 {
   "name": "Machinelearning",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "",
   "repository": {
     "type": "git",
-    "url": "cvtienhoven/graylog-plugin-aggregates"
+    "url": "https://gitlab.com/mlsmartthink/graylog-plugin-machinelearning.git"
   },
   "scripts": {
     "start": "./node_modules/.bin/webpack-dev-server",
@@ -13,10 +13,11 @@
   "keywords": [
     "graylog"
   ],
-  "author": "Christiaan van Tienhoven <c_van_tienhoven@hotmail.com>",
-  "license": "MIT",
+  "author": "Manju",
+  "license": "Private",
   "dependencies": {
     "chart.js": "^1.1.1",
+    "d3": "^4.12.0",
     "graylog-web-plugin": "file:../smartthink2-server/graylog2-web-interface/packages/graylog-web-plugin",
     "react": "^15.6.2",
     "react-bootstrap-table": "^4.0.6",

@@ -8,30 +8,27 @@ import RulesList from './RulesList';
 import EditRuleModal from './EditRuleModal';
 import URLUtils from 'util/URLUtils';
 import { IfPermitted, PageHeader } from 'components/common';
-import elasticsearch from 'elasticsearch';
 import fetch from 'logic/rest/FetchProvider';
 import { BootstrapTable, TableHeaderColumn } from 'react-bootstrap-table';
 import * as d3 from "d3";
-import client from 'machinelearning/ElasticSearch'
+
 
 
 const MachineLearningPage = React.createClass({
   componentDidMount(){
     // TODO: fix this ASAP
-
     // AggregatesActions.getJobs2().then(jobData => {
     //   console.log(jobData);
     //   // tmpl.setState({ jobs: jobs });
     // });
     let tmpl = this;
-
-    var obj = {
-       "jobid": this.props.jobid,
+    console.log(this.props);
+      var obj = {
+        "jobid": this.props.jobid,
         "query_size": 10000,
         "elastic_index_name": "anomaly_result",
-        "start_date": "2015-01-01 18:00:00",
-        "end_date": "2018-01-01 18:00:00",
         }
+        console.log(obj , "sending");
     fetch('POST', URLUtils.qualifyUrl("/plugins/org.graylog.plugins.machinelearning/jobs/getjobDetails"), obj).then(function(resp) {
         var hits = resp.hits.hits;
         var res = [];
@@ -44,6 +41,7 @@ const MachineLearningPage = React.createClass({
         })
         tmpl.setState({data: res})
         tmpl.setState({anmdata: anom})
+        console.log(tmpl.state);
       }, function(err) {
         console.log(err);
       });
@@ -53,6 +51,9 @@ const MachineLearningPage = React.createClass({
     return {
       showCreateJob: false,
     };
+  },
+  handler() {
+    this.props.handler("closeGraphDetails")
   },
   handelCreatejob(evt) {
     this.setState({showCreateJob: !this.state.showCreateJob})
@@ -122,7 +123,15 @@ const MachineLearningPage = React.createClass({
     }
 }
   return (
-    <svg width="960" height="500"></svg>
+    <Row>
+      <Col sm={10}>
+        <svg width="1200" height="500">
+        </svg>
+      </Col>
+      <Col sm={2}>
+        <p onClick={this.handler}> &#10060;</p>
+      </Col>
+    </Row>
   );
   },
 });

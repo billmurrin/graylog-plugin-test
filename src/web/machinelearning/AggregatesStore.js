@@ -12,7 +12,7 @@ const AggregatesStore = Reflux.createStore({
   sourceUrl: '/plugins/org.graylog.plugins.machinelearning/rules',
   sourceJobUrl: '/plugins/org.graylog.plugins.machinelearning/jobaction',
   sourceFethJobid: '/plugins/org.graylog.plugins.machinelearning/jobs',
-  sourceJobUrltest: '/ocpu/library/smartthink/R/smartanomaly/json',
+  startJoburl: '/plugins/org.graylog.plugins.machinelearning/jobaction',
   rules: undefined,
   init() {
     this.trigger({ rules: this.rules });
@@ -60,19 +60,19 @@ const AggregatesStore = Reflux.createStore({
         });
     AggregatesActions.getJobs2.promise(promise);
   },
-  startJob(jobid){
-    const promise = fetch('POST', URLUtils.qualifyUrl(this.sourceJobUrl), jobid)
+  startJob(obj){
+    const promise = fetch('POST', URLUtils.qualifyUrl(this.startJoburl), obj)
       .then(
         response => {
-          this.jobs = response.jobs;
-          this.trigger({ jobs: this.jobs });
-          return this.jobs;
+          console.log(response);
+          // this.jobs = response.jobs;
+          // this.trigger({ jobs: this.jobs });
+          // return this.jobs;
         },
         error => {
-          UserNotification.error(`Fetching aggregate rules failed with status: ${error}`,
-            'Could not retrieve rules');
+          UserNotification.error("starting job failed ");
         });
-    AggregatesActions.getJobs.promise(promise);
+    AggregatesActions.startJob.promise(promise);
   },
   startJob2(job){
     var hostname = AppConfig.gl2ServerUrl().split("9000")[0]+"8004";

@@ -9,6 +9,7 @@ import com.mongodb.MongoException;
 import io.searchbox.client.JestClient;
 import io.searchbox.core.Search;
 import io.searchbox.core.search.aggregation.*;
+import io.searchbox.core.search.sort.Sort;
 import io.searchbox.params.SearchType;
 import io.swagger.annotations.*;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
@@ -17,7 +18,9 @@ import org.elasticsearch.index.query.*;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.bucket.filter.FilterAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramBuilder;
+import org.elasticsearch.search.aggregations.bucket.histogram.Histogram;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
+import org.elasticsearch.search.sort.SortOrder;
 import org.graylog.plugins.machinelearning.job.rest.models.GraphConfigurations;
 import org.graylog.plugins.machinelearning.job.rest.models.JobConfiguration;
 import org.graylog2.Configuration;
@@ -58,6 +61,7 @@ import java.util.stream.Collectors;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static org.elasticsearch.index.query.QueryBuilders.matchAllQuery;
 import static org.elasticsearch.index.query.QueryBuilders.queryStringQuery;
+import static org.elasticsearch.index.query.QueryBuilders.scriptQuery;
 import static org.elasticsearch.search.builder.SearchSourceBuilder.searchSource;
 
 @Api(value = "Machinelearning", description = " Machinelearning rest service. Job result qurying")
@@ -132,13 +136,11 @@ public class JobResource extends RestResource implements PluginRestResource {
     ) throws NotFoundException, MongoException, UnsupportedEncodingException {
         try {
 
-            final AbsoluteRange range1 = AbsoluteRange.create(obj.startDate(), obj.endDate());
             String query= "jobid:"+obj.jobid();
 
             if (query == null || query.trim().isEmpty()) {
                 query = "*";
             }
-
             final QueryBuilder queryBuilder;
             if ("*".equals(query.trim())) {
                 queryBuilder = matchAllQuery();
@@ -146,13 +148,14 @@ public class JobResource extends RestResource implements PluginRestResource {
                 queryBuilder = queryStringQuery(query).allowLeadingWildcard(conf.isAllowLeadingWildcardSearches());
             }
 
-            final String q = searchSource().query(QueryBuilders.boolQuery().must(queryBuilder).filter(standardFilters(range1, null))).toString();
+            final String q = searchSource().query(QueryBuilders.boolQuery().must(queryBuilder)).size( 10000).toString();
             final Search request = new Search.Builder(q)
                     .addIndex( obj.elasticIndexName())
                     .setSearchType(SearchType.DFS_QUERY_THEN_FETCH)
                     .ignoreUnavailable(true)
                     .build();
-
+            System.out.println(obj.elasticIndexName());
+            System.out.println(q.toString());
             final io.searchbox.core.SearchResult result = JestUtils.execute(jestClient, request, () -> "Couldn't build index range of index " +  obj.elasticIndexName());
             return Response.accepted(result.getJsonObject()).build();
         }
@@ -234,35 +237,25 @@ public class JobResource extends RestResource implements PluginRestResource {
     })
     public Response getDataString(@ApiParam(name = "JSON body", required = true)
                                   @Valid @NotNull GraphConfigurations obj
-    ) throws ElasticsearchException, ParseException {
+    ) throws ElasticsearchException {
         try {
+System.out.println(obj.startDate()+ "System.out.println(obj.startDate());");
 
-            DateTime start = DateTime.parse(obj.startDate(),DateTimeFormat.forPattern("YYYY-MM-DD HH:mm:ss"));
-            DateTime end = DateTime.parse(obj.endDate(), DateTimeFormat.forPattern("YYYY-MM-DD HH:mm:ss"));
+            System.out.println(obj.endDate()+ "System.out.println(obj.endDate()());");
+                DateTime start = DateTime.parse(obj.startDate(),DateTimeFormat.forPattern("YYYY-MM-DD HH:mm:ss.SSS"));
+            DateTime end = DateTime.parse(obj.endDate(), DateTimeFormat.forPattern("YYYY-MM-DD HH:mm:ss.SSS"));
 
-            final DateHistogramBuilder dateHistogramBuilder = AggregationBuilders.dateHistogram("gl2_histogram")
+            final DateHistogramBuilder dateHistogramBuilder = AggregationBuilders.dateHistogram("gl2_histogram").order(Histogram.Order.KEY_DESC)
                     .field(obj.timeStampField())
-                    .subAggregation(AggregationBuilders.stats("gl2_stats")
-                            .field(obj.fieldName()))
-                    .interval(
-                            Searches
-                                    .DateHistogramInterval
-                                    .HOUR
-                                    .toESInterval()
-                    );
+                    .subAggregation(AggregationBuilders.stats("gl2_stats").field(obj.fieldName()))
+                    .interval(Searches.DateHistogramInterval.HOUR .toESInterval());
 
-            RangeQueryBuilder queryDate = QueryBuilders.rangeQuery(obj.timeStampField()).to(end).from(start);
-            final FilterAggregationBuilder builder = AggregationBuilders
-                    .filter("agg")
-                    .filter(queryDate)
-                    .subAggregation(dateHistogramBuilder)
-                    .subAggregation(AggregationBuilders.avg("ts_min").field(obj.fieldName()));
-
-            final String query = searchSource()
-                    .aggregation(builder)
-                    .size(10)
-                    .toString();
-            System.out.println(query+ "**********************88");
+            RangeQueryBuilder queryDate = QueryBuilders.rangeQuery(obj.timeStampField()).to(obj.endDate()).from(obj.startDate());
+            final FilterAggregationBuilder builder = AggregationBuilders.filter("agg")
+                                                    .filter(queryDate)
+                                                    .subAggregation(dateHistogramBuilder)
+                                                    .subAggregation(AggregationBuilders.avg("ts_min").field(obj.fieldName()));
+            final String query = searchSource().aggregation(builder).toString();
 
             final Search request = new Search.Builder(query)
                     .addIndex(obj.elasticIndexName())
@@ -277,26 +270,20 @@ public class JobResource extends RestResource implements PluginRestResource {
 
             terms = filterAggregation.getTermsAggregation("gl2_histogram").getBuckets().stream()
                     .map(e -> {
-                        Date date1 = null;
-                        try {
-                            date1=new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").parse(e.getKeyAsString());
-                        }catch (ParseException e1) {
-                            e1.printStackTrace();
-                        }
 
                         final Map<String, Object> resultMap = Maps.newHashMap();
                         resultMap.put("key_field", e.getKey());
-                        resultMap.put("date", date1);
+                        resultMap.put("date", e.getKeyAsString());
                         resultMap.put("count", e.getCount());
                         final StatsAggregation stats = e.getStatsAggregation(Searches.AGG_STATS);
-                        resultMap.put("min", stats.getMin());
-                        resultMap.put("max", stats.getMax());
-                        resultMap.put("total", stats.getSum());
-                        resultMap.put("total_count", stats.getCount());
-                        resultMap.put("mean", stats.getAvg());
+
+                        resultMap.put("min", stats.getMin()==null? 0: stats.getMin());
+                        resultMap.put("max", stats.getMax()==null? 0: stats.getMax());
+                        resultMap.put("total", stats.getSum()==null?0: stats.getSum());
+                        resultMap.put("total_count", stats.getCount()==null?0: stats.getCount());
+                        resultMap.put("mean", stats.getAvg()==null?0 :stats.getAvg());
                         return resultMap;
-                    }).sorted(COMPARATOR)
-                    .collect(Collectors.toList());
+                    }).collect(Collectors.toList());
             return Response.accepted(terms).build();
         }
         catch (Exception e) {
