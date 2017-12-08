@@ -205,7 +205,7 @@ const CreateJobForm = React.createClass({
       "query_size": 100,
       "time_stamp_field":"timestamp"
     }
-    console.log(data);  
+    console.log(data);
     var callback = function(res) {
       $("#graph svg").remove()
       console.log(res , "result data**********88");
@@ -351,99 +351,103 @@ console.log(this.props);
     return (
       <div>
       <Form state={this.state} onChange={state => this.setState(state)}>
-      <fieldset>
-      <Row className="row-sm">
-      <Col sm={2}>
-      <Input ref="jobid" name="jobid" id="jobid" type="text" maxLength={100} defaultValue={this.state.originalName}
-      labelClassName="col-sm-12" wrapperClassName="col-sm-12"
-      label="Name" help="Enter a unique job id." required
-      onChange={this._onValueChanged} autoFocus />
-      </Col>
-      <Col sm={2}>
-      <Input ref="jobType" name="jobType" id="jobType" type="select" value={this.state.jobType}
-      labelClassName="col-sm-12" wrapperClassName="col-sm-12"
-      label="Job Type" help="Select a job Type." required
-      onChange={this._onValueChanged} ><option value="true">Select</option>
-      {this.state.jobTypeops}
-      </Input>
-      </Col>
-      <Col sm={2}>
-      <Input ref="type" name="aggregationType" id="aggregationType" type="select" value={this.state.type}
-      labelClassName="col-sm-12" wrapperClassName="col-sm-12"
-      label="Aggregation Type" help="Select a aggregation type." required
-      onChange={this._onValueChanged} ><option value="true">Select</option>
-      {this.state.typeOPs}
-      </Input>
-      </Col>
-      <Col sm={2}>
-      <Input ref="streamName" name="streamName" id="streamName" type="select" value={this.state.streamName}
-      labelClassName="col-sm-12" wrapperClassName="col-sm-12"
-      label="Stream's" help="Select a stream." required
-      onChange={this.handelStreamChange} > <option value="true">Select</option>
-      {this.state.opts}
-      </Input>
-      </Col>
-      <Col sm={2}>
-      <Input ref="fields" name="field" id="fields" type="select" value={this.state.field}
-      labelClassName="col-sm-12" wrapperClassName="col-sm-12"
-      label="Field's" help="Select a field." required
-      onChange={this._onValueChanged} > {this.state.optsFields}
-      </Input>
-      </Col>
-      <Col sm={2}>
-      <Input ref="bucketSpan" name="bucketSpan" id="bucketSpan" type="select" value={this.state.bucket}
-      labelClassName="col-sm-12" wrapperClassName="col-sm-12"
-      label="Bucket span" help="Select time span." required
-      onChange={this._onValueChanged} > {this.state.buck}
-      </Input>
-      </Col>
-      <Col sm={6}>
-        <div className="row no-bm" style={{ marginLeft: 50 }}>
-          <div className="col-md-6" style={{ padding: 0 }}>
-            <DatePicker id="searchFromDatePicker"
-            title="Search start date"
-            onChange={this._onDateSelected('startDate')} className="form-control">
-            <Input type="text"
-            ref="startDateFormatted"
-            onChange={this._rangeParamsChanged('startDate')}
-            placeholder={DateTime.Formats.DATETIME}
-            label="Start"
-            buttonAfter={<Button bsSize="small" onClick={this._setDateTimeToNow('startDate')}><i className="fa fa-magic" /></Button>}
-            bsSize="small"
-            required />
-            </DatePicker>
-        </div>
-        <div className="col-md-6" style={{ padding: 0 }}>
-          <DatePicker id="searchToDatePicker"
-          title="Search End date"
-          onChange={this._onDateSelected('endDate')} className="form-control">
-          <Input type="text"
-          ref="endDateFormatted"
-          labelClassName="col-sm-2"
-          label="End"
-          onChange={this._rangeParamsChanged('endDate')}
-          placeholder={DateTime.Formats.DATETIME}
-          buttonAfter={<Button bsSize="small" onClick={this._setDateTimeToNow('startDate')}><i className="fa fa-magic" /></Button>}
-          bsSize="small"
-          required />
-          </DatePicker>
-        </div>
-      </div>
+            <fieldset>
+              <Row className="row-sm">
+                <Col sm={2}>
+                  <Input ref="jobid" name="jobid" id="jobid" type="text" maxLength={100} defaultValue={this.state.originalName}
+                  labelClassName="col-sm-12" wrapperClassName="col-sm-12"
+                  label="Name" help="Enter a unique job id." required
+                  onChange={this._onValueChanged} autoFocus />
+                </Col>
+                <Col sm={2}>
+                  <Input ref="jobType" name="jobType" id="jobType" type="select" value={this.state.jobType}
+                  labelClassName="col-sm-12" wrapperClassName="col-sm-12"
+                  label="Job Type" help="Select a job Type." required
+                  onChange={this._onValueChanged} ><option value="true">Select</option>
+                  {this.state.jobTypeops}
+                  </Input>
+                </Col>
+                <Col sm={2}>
+                  <Input ref="type" name="aggregationType" id="aggregationType" type="select" value={this.state.type}
+                  labelClassName="col-sm-12" wrapperClassName="col-sm-12"
+                  label="Aggregation Type" help="Select a aggregation type." required
+                  onChange={this._onValueChanged} ><option value="true">Select</option>
+                  {this.state.typeOPs}
+                  </Input>
+                </Col>
+                <Col sm={2}>
+                  <Input ref="streamName" name="streamName" id="streamName" type="select" value={this.state.streamName}
+                  labelClassName="col-sm-12" wrapperClassName="col-sm-12"
+                  label="Stream's" help="Select a stream." required
+                  onChange={this.handelStreamChange} > <option value="true">Select</option>
+                  {this.state.opts}
+                  </Input>
+                </Col>
+                <Col sm={2}>
+                  <Input ref="fields" name="field" id="fields" type="select" value={this.state.field}
+                  labelClassName="col-sm-12" wrapperClassName="col-sm-12"
+                  label="Field's" help="Select a field." required
+                  onChange={this._onValueChanged} > {this.state.optsFields}
+                  </Input>
+                </Col>
+                <Col sm={2}>
+                  <Input ref="bucketSpan" name="bucketSpan" id="bucketSpan" type="select" value={this.state.bucket}
+                  labelClassName="col-sm-12" wrapperClassName="col-sm-12"
+                  label="Bucket span" help="Select time span." required
+                  onChange={this._onValueChanged} > {this.state.buck}
+                  </Input>
+                </Col>
+              </Row>
+              <Row className="row-sm">
+                <Col md={6}>
+                  <div className="row no-bm" style={{ marginLeft: 17 }}>
+                    <div className="col-md-6" style={{ padding: 0 }}>
+                      <DatePicker id="searchFromDatePicker"
+                        title="Search start date"
+                        onChange={this._onDateSelected('startDate')} className="form-control">
+                        <Input type="text"
+                          ref="startDateFormatted"
+                          onChange={this._rangeParamsChanged('startDate')}
+                          placeholder={DateTime.Formats.DATETIME}
+                          label="Start"
+                          buttonAfter={<Button bsSize="small" onClick={this._setDateTimeToNow('startDate')}><i className="fa fa-magic" /></Button>}
+                          bsSize="small"
+                          required />
+                        </DatePicker>
+                      </div>
+                      <div className="col-md-6" style={{ paddingleft : 10 }}>
+                        <DatePicker id="searchToDatePicker"
+                        title="Search End date"
+                        onChange={this._onDateSelected('endDate')} className="form-control">
+                          <Input type="text"
+                          ref="endDateFormatted"
+                          labelClassName="col-sm-2"
+                          label="End"
+                          onChange={this._rangeParamsChanged('endDate')}
+                          placeholder={DateTime.Formats.DATETIME}
+                          buttonAfter={<Button bsSize="small" onClick={this._setDateTimeToNow('startDate')}><i className="fa fa-magic" /></Button>}
+                          bsSize="small"
+                          required />
+                        </DatePicker>
+                      </div>
+                    </div>
+                </Col>
+                <Col md={6}>
+                  <Col sm={2}>
+                    <button onClick={this.showGraph} id="view-job" type="button" className="btn btn-lg btn-primary pull-right padd-top buttonBg" title="View Job">
+                      <i className="fa fa-bar-chart fa-1" aria-hidden="true"></i>
+                    </button>
+                  </Col>
+                  <Col sm={2}>
+                    <button onClick={this._save} id="save-job" type="button" className="btn btn-lg btn-primary pull-right padd-top buttonBg" title="Save Job">
+                    <i className="fa fa-floppy-o fa-1 buttonBg" aria-hidden="true"></i>
+                    </button>
+                  </Col>
+                </Col>
+              </Row>
+            </fieldset>
+          </Form>
 
-      </Col>
-      <Col sm={2}>
-      <button onClick={this.showGraph} id="view-job" type="button" className="btn btn-xs btn-primary pull-right" title="view job">
-      View graph
-      </button>
-      </Col>
-      <Col sm={2}>
-      <button onClick={this._save} id="save-job" type="button" className="btn btn-xs btn-primary pull-right" title="save job">
-      Save Job
-      </button>
-      </Col>
-      </Row>
-      </fieldset>
-      </Form>
       </div>
     );
   },

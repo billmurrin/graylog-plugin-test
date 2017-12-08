@@ -162,8 +162,8 @@ console.log(obj ," starting obj");
       let table = null;
       let chart = null;
 
-      const filterKeys = ['jobid','field', 'aggrigationType'];
-      const headers = ['Aggrigation Type', 'Start Date', 'EndDate', 'Field', 'Job Id', 'Job Type'];
+      const filterKeys = ['jobid','field', 'aggregationType'];
+      const headers = ['Aggregation Type', 'Start Date', 'EndDate', 'Field', 'Job Id', 'Job Type'];
       if(this.state.viewGraphContent) {
           dispContent = ( <ViewGraph jobid={this.state.currentJobId} handler={this.handler}/> )
       }
