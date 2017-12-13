@@ -11,6 +11,6 @@ public interface JobService {
     Job fromRequest(AddJobRequest request);
     Job create(Job job);
     void delete(String jobid);
-    List<Job> all();
+    List<Job> all(String type);
 
 }

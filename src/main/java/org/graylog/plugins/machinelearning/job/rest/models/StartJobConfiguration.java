@@ -20,6 +20,7 @@ public abstract class StartJobConfiguration {
     @Nullable
     public abstract String hostIp();
 
+
     @JsonProperty("jobid")
     @ObjectId
     public abstract String jobId();
@@ -29,7 +30,7 @@ public abstract class StartJobConfiguration {
     @ObjectId
     public abstract String aggregationType();
 
-    @JsonProperty("end_date")
+    @JsonProperty("endDate")
     @ObjectId
     @Nullable
     public abstract String endDate();
@@ -76,13 +77,29 @@ public abstract class StartJobConfiguration {
     public abstract String alphaParameter();
 
 
+    @JsonProperty("host_port")
+    @ObjectId
+    @Nullable
+    public abstract String hostPort();
+
+
+    @JsonProperty("max_docs")
+    @ObjectId
+    @Nullable
+    public abstract String maxDocs();
+
+    @JsonProperty("streaming")
+    @ObjectId
+    @Nullable
+    public abstract String streaming();
+
     @JsonCreator
     public static StartJobConfiguration create(
             @JsonProperty("field") String field,
             @JsonProperty("host_ip") String hostIp,
             @JsonProperty("jobid") String jobid,
             @JsonProperty("aggregationType") String aggregationType,
-            @JsonProperty("end_date") String endDate,
+            @JsonProperty("endDate") String endDate,
             @JsonProperty("startDate") String startDate,
             @JsonProperty("bucketSpan") String bucketSpan,
             @JsonProperty("indexSetName") String indexSetName,
@@ -92,10 +109,13 @@ public abstract class StartJobConfiguration {
             @JsonProperty("anom_type") String anomType,
             @JsonProperty("anomaly_direction") String anomalyDirection,
             @JsonProperty("max_ratio_of_anomaly") String maxRatioOfAnomaly,
-            @JsonProperty("alpha_parameter") String alphaParameter
+            @JsonProperty("alpha_parameter") String alphaParameter,
+            @JsonProperty("host_port") String hostPort,
+            @JsonProperty("max_docs") String maxDocs,
+            @JsonProperty("streaming") String streaming
     ){
         return new AutoValue_StartJobConfiguration(field, hostIp,jobid, aggregationType,endDate, startDate, bucketSpan, indexSetName, sourceindextype, timestampfield,
-                anomIndex, anomType, anomalyDirection, maxRatioOfAnomaly, alphaParameter);
+                anomIndex, anomType, anomalyDirection, maxRatioOfAnomaly, alphaParameter, hostPort , maxDocs, streaming);
     }
 
 }

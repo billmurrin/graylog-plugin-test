@@ -198,13 +198,7 @@ const MachineLearningPage = React.createClass({
     tmpl.setState({showJobDetails:true})
     tmpl.setState({currentJobId:evt.currentTarget.id})
   },
-  _startjob(evt){
-    let tmpl = this;;
-     var job = this.state.jobs.find(x => x.jobid === evt.currentTarget.id);
-    AggregatesActions.startJob2(job).then(status => {
-      console.log(status);
-    });
-  },
+ 
   _deletejob(evt){
     let tmpl = this;
     if (window.confirm(`Do you really want to delete job`)) {
@@ -261,7 +255,7 @@ const MachineLearningPage = React.createClass({
            "time_stamp_field":"timestamp"
          }
 console.log(re);
-fetch('POST', "http://localhost:9000/api/plugins/org.graylog.plugins.machinelearning/jobs/fields/cvc", result).then(function(r) {
+fetch('POST', "http://localhost:9000/api/plugins/org.graylog.plugins.machinelearning/jobs/graph/search", result).then(function(r) {
   console.log(r+ "result************8");
 
 }, function(er) {

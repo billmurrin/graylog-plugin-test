@@ -3,11 +3,13 @@ package org.graylog.plugins.machinelearning.job;
 import com.google.common.collect.Lists;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
+import com.mongodb.DBObject;
 import com.mongodb.QueryBuilder;
 import org.graylog.plugins.machinelearning.job.rest.models.requests.AddJobRequest;
 import org.graylog2.bindings.providers.MongoJackObjectMapperProvider;
 import org.graylog2.database.CollectionName;
 import org.graylog2.database.MongoConnection;
+import org.graylog2.users.UserImpl;
 import org.mongojack.DBCursor;
 import org.mongojack.DBQuery;
 import org.mongojack.JacksonDBCollection;
@@ -46,7 +48,12 @@ public class JobServiceImpl implements JobService {
 
 
     @Override
-    public List<Job> all() {        return  toAbstractListType(coll.find());}
+    public List<Job> all(String type) {
+
+        final DBObject query = new BasicDBObject();
+        query.put("jobType", type);
+        return  toAbstractListType(coll.find(query));
+}
 
 
     @Override
@@ -69,18 +76,17 @@ public class JobServiceImpl implements JobService {
             BasicDBObject document = new BasicDBObject();
             document.put("jobid", jobid);
             coll.remove(document);
-
     }
 
     @Override
     public Job fromRequest(AddJobRequest request) {
-          return JobImpl.create(request.getJob().getAggregationType(), request.getJob().getField(), request.getJob().getStartDate(), request.getJob().getEndDate(), request.getJob().getStreamName(), request.getJob().getJobid(), request.getJob().getBucketSpan(), request.getJob().getIndexSetName(), request.getJob().getJobType());
+          return JobImpl.create(request.getJob().getAggregationType(), request.getJob().getField(), request.getJob().getStartDate(), request.getJob().getEndDate(), request.getJob().getStreamName(), request.getJob().getJobid(), request.getJob().getBucketSpan(), request.getJob().getIndexSetName(), request.getJob().getJobType(), request.getJob().getLuceneQuery(), request.getJob().getStreamId());
     }
 
     private List<Job> toAbstractListType(DBCursor<JobImpl> job) {
         return toAbstractListType(job.toArray());
     }
-    private List<Job> toAbstractListType(List<JobImpl> job) {
+    private List<Job>   toAbstractListType(List<JobImpl> job) {
         final List<Job> result = Lists.newArrayListWithCapacity(job.size());
         result.addAll(job);
         return result;

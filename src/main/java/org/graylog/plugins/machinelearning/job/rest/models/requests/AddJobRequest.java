@@ -12,7 +12,7 @@ import javax.validation.constraints.NotNull;
 
 @AutoValue
 @JsonAutoDetect
-public abstract class AddJobRequest {
+public abstract class   AddJobRequest {
 
     @JsonProperty("job")
     @NotNull

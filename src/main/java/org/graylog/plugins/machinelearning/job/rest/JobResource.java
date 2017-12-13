@@ -18,9 +18,11 @@ import org.elasticsearch.index.query.*;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.bucket.filter.FilterAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramBuilder;
+import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramInterval;
 import org.elasticsearch.search.aggregations.bucket.histogram.Histogram;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.SortOrder;
+import org.graylog.plugins.machinelearning.job.JobServiceImpl;
 import org.graylog.plugins.machinelearning.job.rest.models.GraphConfigurations;
 import org.graylog.plugins.machinelearning.job.rest.models.JobConfiguration;
 import org.graylog2.Configuration;
@@ -52,6 +54,8 @@ import javax.ws.rs.core.Response;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormat;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.UnsupportedEncodingException;
 import java.text.ParseException;
@@ -71,43 +75,14 @@ import static org.elasticsearch.search.builder.SearchSourceBuilder.searchSource;
 public class JobResource extends RestResource implements PluginRestResource {
     private final Configuration conf;
     private final JestClient jestClient;
+    private static final Logger LOG = LoggerFactory.getLogger(JobServiceImpl.class);
 
     @Inject
     public JobResource(Configuration conf, JestClient jestClient) {
         this.conf= conf;
         this.jestClient = jestClient;
-
-
     }
-    private static final Comparator<Map<String, Object>> COMPARATOR = (o1, o2) -> {
-        double o1Mean = (double) o1.get("mean");
-        double o2Mean = (double) o2.get("mean");
-        if (o1Mean > o2Mean) {
-            return -1;
-        } else if (o1Mean < o2Mean) {
-            return 1;
-        }
-        return 0;
-    };
-    @Nullable
-    private QueryBuilder standardFilters(TimeRange range, String filter) {
-        BoolQueryBuilder bfb = null;
 
-        if (range != null) {
-            bfb = QueryBuilders.boolQuery();
-            bfb.must(IndexHelper.getTimestampRangeFilter(range));
-        }
-
-        // Not creating a filter for a "*" value because an empty filter used to be submitted that way.
-        if (!isNullOrEmpty(filter) && !"*".equals(filter)) {
-            if (bfb == null) {
-                bfb = QueryBuilders.boolQuery();
-            }
-            bfb.must(queryStringQuery(filter));
-        }
-
-        return bfb;
-    }
 
 //
 //{
@@ -154,8 +129,7 @@ public class JobResource extends RestResource implements PluginRestResource {
                     .setSearchType(SearchType.DFS_QUERY_THEN_FETCH)
                     .ignoreUnavailable(true)
                     .build();
-            System.out.println(obj.elasticIndexName());
-            System.out.println(q.toString());
+            LOG.info("query"+ q.toString());
             final io.searchbox.core.SearchResult result = JestUtils.execute(jestClient, request, () -> "Couldn't build index range of index " +  obj.elasticIndexName());
             return Response.accepted(result.getJsonObject()).build();
         }
@@ -228,8 +202,35 @@ public class JobResource extends RestResource implements PluginRestResource {
 //    }
 //
 
+
+    public  DateHistogramInterval getInterval(String interval) {
+
+        switch (interval) {
+            case "5m":
+            return DateHistogramInterval.minutes(5);
+            case "15m":
+                return DateHistogramInterval.minutes(15);
+            case "30m":
+                return DateHistogramInterval.minutes(30);
+            case "1h":
+                return DateHistogramInterval.hours(1);
+            case "3h":
+                return DateHistogramInterval.hours(3);
+            case "6h":
+                return DateHistogramInterval.hours(6);
+            case "12h":
+                return DateHistogramInterval.hours(12);
+            case "1d":
+                return DateHistogramInterval.days(1);
+            case "7d":
+                return DateHistogramInterval.days(7);
+        }
+        return  null;
+    }
+
+
     @POST
-    @Path("/fields/cvc")
+    @Path("/graph/search")
     @RequiresAuthentication
     @ApiOperation(value = "Delete a job")
     @ApiResponses(value = {
@@ -239,24 +240,31 @@ public class JobResource extends RestResource implements PluginRestResource {
                                   @Valid @NotNull GraphConfigurations obj
     ) throws ElasticsearchException {
         try {
-System.out.println(obj.startDate()+ "System.out.println(obj.startDate());");
-
-            System.out.println(obj.endDate()+ "System.out.println(obj.endDate()());");
-                DateTime start = DateTime.parse(obj.startDate(),DateTimeFormat.forPattern("YYYY-MM-DD HH:mm:ss.SSS"));
-            DateTime end = DateTime.parse(obj.endDate(), DateTimeFormat.forPattern("YYYY-MM-DD HH:mm:ss.SSS"));
-
             final DateHistogramBuilder dateHistogramBuilder = AggregationBuilders.dateHistogram("gl2_histogram").order(Histogram.Order.KEY_DESC)
                     .field(obj.timeStampField())
                     .subAggregation(AggregationBuilders.stats("gl2_stats").field(obj.fieldName()))
-                    .interval(Searches.DateHistogramInterval.HOUR .toESInterval());
+                    .interval(getInterval(obj.bucketSpan()));
 
-            RangeQueryBuilder queryDate = QueryBuilders.rangeQuery(obj.timeStampField()).to(obj.endDate()).from(obj.startDate());
-            final FilterAggregationBuilder builder = AggregationBuilders.filter("agg")
-                                                    .filter(queryDate)
+//            final DateHistogramBuilder dateHistogramBuilder = AggregationBuilders.dateHistogram("gl2_histogram").order(Histogram.Order.KEY_DESC)
+//                    .field(obj.timeStampField())
+//                    .subAggregation(AggregationBuilders.stats("gl2_stats").field(obj.fieldName()))
+//                    .interval(Searches.DateHistogramInterval.HOUR .toESInterval());
+//            RangeQueryBuilder queryDate = QueryBuilders.rangeQuery(obj.timeStampField()).to(obj.endDate()).from(obj.startDate());
+
+
+            String queryString = "";
+            if (obj.luceneQuery() != null && !obj.luceneQuery().isEmpty()) {
+                queryString = obj.luceneQuery();
+
+            }else {
+                queryString ="*";
+            }
+            final FilterAggregationBuilder builder = AggregationBuilders.filter("agg").filter(QueryBuilders.queryStringQuery(queryString))
                                                     .subAggregation(dateHistogramBuilder)
                                                     .subAggregation(AggregationBuilders.avg("ts_min").field(obj.fieldName()));
             final String query = searchSource().aggregation(builder).toString();
 
+            LOG.info("query"+ query);
             final Search request = new Search.Builder(query)
                     .addIndex(obj.elasticIndexName())
                     .setSearchType(SearchType.DFS_QUERY_THEN_FETCH)
@@ -284,6 +292,8 @@ System.out.println(obj.startDate()+ "System.out.println(obj.startDate());");
                         resultMap.put("mean", stats.getAvg()==null?0 :stats.getAvg());
                         return resultMap;
                     }).collect(Collectors.toList());
+
+            LOG.info("total size feached"+ terms.size());
             return Response.accepted(terms).build();
         }
         catch (Exception e) {

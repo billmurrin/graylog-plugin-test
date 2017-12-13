@@ -20,7 +20,7 @@ const AggregatesPage = React.createClass({
       <span>
         <PageHeader title="Machine learning">
           <span>
-            please define Machine learning here  
+            please define Machine learning here
           </span>
 
           <span>

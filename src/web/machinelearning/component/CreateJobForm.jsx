@@ -18,7 +18,7 @@ import * as d3 from "d3";
 import "./style.css"
 import { Line } from "react-chartjs";
 import AggregatesActions from 'machinelearning/AggregatesActions';
-
+import UserNotification from 'util/UserNotification';
 var chartOptions = {
   bezierCurve : false,
   datasetFill : false,
@@ -87,6 +87,9 @@ const CreateJobForm = React.createClass({
     var callback = function(res) {
       var arrTen = [];
       console.log(res);
+      tmpl.setState({
+        streams: res
+      })
       res.streams.map(function(s) {
         arrTen.push(<option id={s.index_set_id} key={s.id} value={s.id}> {s.description} </option>);
       })
@@ -137,12 +140,13 @@ const CreateJobForm = React.createClass({
   },
   _save(){
     let tmpl = this;
+    if(!tmpl.state.saveJob) UserNotification.error("can't save this job gaph id not displayed/ no data is feched please re-frame the query params ");
     const failCallback = (errorThrown) => {
       console.log("errorThrown", errorThrown)
     };
     var callback = function(k) {
       tmpl.props.handelState("showJobs")
-      AggregatesActions.getJobs().then(jobs => {
+      AggregatesActions.getJobs("anomaly").then(jobs => {
         tmpl.setState({ jobs: jobs });
       });
     }
@@ -193,9 +197,7 @@ const CreateJobForm = React.createClass({
     let tmpl = this;
     console.log("show graph");
     console.log(this.state.job);
-    // var parseTime = d3.timeParse("%Y-%m-%dT%H:%M:%SZ");
     var job = this.state.job;
-
 
     var data =   {
       "elastic_index_name": job.indexSetName+ "*",
@@ -208,13 +210,15 @@ const CreateJobForm = React.createClass({
     console.log(data);
     var callback = function(res) {
       $("#graph svg").remove()
-      console.log(res , "result data**********88");
+      if(res.length) {
+        tmpl.setState({saveJob: true})
+      }
       tmpl._createGraph(res);
     }
     var failCallback = function(err) {
       console.log(err);
     }
-    var url = URLUtils.qualifyUrl("/plugins/org.graylog.plugins.machinelearning/jobs/fields/cvc");
+    var url = URLUtils.qualifyUrl("/plugins/org.graylog.plugins.machinelearning/jobs/graph/search");
     fetch('POST', url, data).then(callback, failCallback);
 
   },
@@ -330,8 +334,8 @@ const CreateJobForm = React.createClass({
     var callback = function(res) {
       job.indexSetName = res.index_prefix;
       tmpl.setState({ job: job });
-      console.log(job.indexSetName+"_0");
-      SchedulesActions.getFields( job.indexSetName+"_0").then(fields => {
+      console.log(job.indexSetName+"*");
+      SchedulesActions.getFields( job.indexSetName+"*").then(fields => {
         var arrTen = [];
         fields.map(function(k) {
           arrTen.push(<option key={k} value={k}> {k} </option>);
@@ -433,14 +437,14 @@ console.log(this.props);
                     </div>
                 </Col>
                 <Col md={6}>
-                  <Col sm={2}>
+                  <Col sm={3}>
                     <button onClick={this.showGraph} id="view-job" type="button" className="btn btn-lg btn-primary pull-right padd-top buttonBg" title="View Job">
-                      <i className="fa fa-bar-chart fa-1" aria-hidden="true"></i>
+                    Show Graph
                     </button>
                   </Col>
-                  <Col sm={2}>
+                  <Col sm={3}>
                     <button onClick={this._save} id="save-job" type="button" className="btn btn-lg btn-primary pull-right padd-top buttonBg" title="Save Job">
-                    <i className="fa fa-floppy-o fa-1 buttonBg" aria-hidden="true"></i>
+                    Save  Graph
                     </button>
                   </Col>
                 </Col>

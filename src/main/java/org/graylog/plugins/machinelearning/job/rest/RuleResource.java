@@ -11,6 +11,7 @@ import org.apache.shiro.authz.annotation.RequiresAuthentication;
 import org.graylog.plugins.machinelearning.MachinelearningConfiguration;
 import org.graylog.plugins.machinelearning.job.Job;
 import org.graylog.plugins.machinelearning.job.JobService;
+import org.graylog.plugins.machinelearning.job.rest.models.JobsTypeConfiguration;
 import org.graylog.plugins.machinelearning.job.rest.models.requests.AddJobRequest;
 import org.graylog.plugins.machinelearning.job.rest.models.responses.JobList;
 import org.graylog2.plugin.rest.PluginRestResource;
@@ -41,12 +42,15 @@ public class RuleResource extends RestResource implements PluginRestResource {
 
     }
 
-    @GET
+    @POST
     @Timed
     @ApiOperation(value = "Lists all existing jobs")
     @RequiresAuthentication
-    public JobList list() {
-        final List<Job> jobs = jobService.all();
+    public JobList list(
+            @ApiParam(name = "JSON body", required = true) @Valid @NotNull JobsTypeConfiguration request
+    ) {
+        System.out.println(request.jobType()+ "TYpe");
+        final List<Job> jobs = jobService.all(request.jobType());
         return JobList.create(jobs);
     }
 

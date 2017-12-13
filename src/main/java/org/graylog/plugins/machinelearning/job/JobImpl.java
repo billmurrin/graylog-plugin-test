@@ -1,5 +1,6 @@
 package org.graylog.plugins.machinelearning.job;
 
+import javax.annotation.Nullable;
 import javax.validation.constraints.NotNull;
 
 import org.graylog2.database.CollectionName;
@@ -30,13 +31,13 @@ public abstract class JobImpl implements Job{
 
     @JsonProperty("startDate")
     @Override
-    @NotNull
+    @Nullable
     public abstract String getStartDate();
 
 
     @JsonProperty("endDate")
     @Override
-    @NotNull
+    @Nullable
     public abstract String getEndDate();
 
 
@@ -69,6 +70,16 @@ public abstract class JobImpl implements Job{
     @NotNull
     public abstract String getJobType();
 
+    @JsonProperty("luceneQuery")
+    @Override
+    @NotNull
+    public abstract String getLuceneQuery();
+
+    @JsonProperty("streamId")
+    @Override
+    @NotNull
+    public abstract String getStreamId();
+
     @JsonCreator
     public static JobImpl create( @JsonProperty("aggregationType") String aggregationType,
                                   @JsonProperty("field") String field,
@@ -78,9 +89,11 @@ public abstract class JobImpl implements Job{
                                   @JsonProperty("jobid") String  jobid,
                                   @JsonProperty("bucketSpan") String  bucketSpan,
                                   @JsonProperty("indexSetName") String  indexSetName,
-                                  @JsonProperty("jobType") String  jobType
+                                  @JsonProperty("jobType") String  jobType,
+                                  @JsonProperty("luceneQuery") String  luceneQuery,
+                                  @JsonProperty("streamId") String  streamId
                                   ) {
-        return new AutoValue_JobImpl(aggregationType, field, startDate, endDate, streamName, jobid, bucketSpan, indexSetName, jobType);
+        return new AutoValue_JobImpl(aggregationType, field, startDate, endDate, streamName, jobid, bucketSpan, indexSetName, jobType, luceneQuery, streamId);
     }
 
 

@@ -21,4 +21,8 @@ public interface Job {
 
     public String getJobType();
 
+    public String getLuceneQuery();
+
+    public String getStreamId();
+
 }

@@ -27,14 +27,11 @@ const StreamsStore = StoreProvider.getStore('Streams');
 const CurrentUserStore = StoreProvider.getStore('CurrentUser');
 import CombinedProvider from 'injection/CombinedProvider';
 const { AlertNotificationsStore } = CombinedProvider.get('AlertNotifications');
-
+import AnomalyDetectionActions from 'machinelearning/actions/AnomalyDetectionActions';
 
 const JobsDisplay = React.createClass({
   componentDidMount(){
-    let tmpl = this;
-    AggregatesActions.getJobs(this.props.jobType).then(jobs => {
-      tmpl.setState({ jobs: jobs });
-    });
+    this.setState({jobs: this.props.jobs})
   },
   getInitialState() {
     return {
@@ -56,28 +53,17 @@ const JobsDisplay = React.createClass({
         {view}&nbsp;&nbsp;{start}&nbsp;&nbsp;{del}&nbsp;
       </div>
     );
+
     return (
       <tr key={job.jobid}>
-      <td className="limited">{job.aggregationType}</td>
-      <td className="limited">{job.startDate}</td>
-      <td className="limited">{job.endDate}</td>
-      <td className="limited">{job.field}</td>
       <td className="limited">{job.jobid}</td>
-      <td className="limited">{job.jobType}</td>
+      <td className="limited">{job.streamName}</td>
+      <td className="limited">{job.aggregationType}</td>
+      <td className="limited">{job.field}</td>
       <td>{actions}</td>
       </tr>
 
     );
-  },
-  _isValidDateString(dateString) {
-    try {
-      if (dateString !== undefined) {
-        DateTime.parseFromString(dateString);
-      }
-      return true;
-    } catch (e) {
-      return false;
-    }
   },
   _headerCellFormatter(header) {
     let formattedHeaderCell;
@@ -95,44 +81,29 @@ const JobsDisplay = React.createClass({
 
     return formattedHeaderCell;
   },
-  showCreateJobForm(){
-      this.setState({ createJobForm: !this.state.createJobForm });
-  },
- handler(state) {
-
-   switch (state) {
-     case "showJobs":
-     this.setState({createJobForm: false })
-       break;
-     case "showCreateJob":
-     this.setState({createJobForm: true })
-       break;
-     case "closeGraphDetails":
-     this.setState({viewGraphContent: false })
-     this.setState({createJobForm: false })
-       break;
-     default:
-
-   }
-   console.log(this.state);
+_deletejob(evt){
+  let tmpl = this;
+  if (window.confirm(`Do you really want to delete job`)) {
+    AnomalyDetectionActions.deletejob(evt.currentTarget.id).then(status => {
+      tmpl.props.handelState()
+    });
+  }
 },
  _viewjob(evt) {
    this.setState({viewGraphContent: true })
    this.setState({currentJobId:evt.currentTarget.id})
 },
  _startjob(evt) {
-   console.log(this.state);
-   console.log(this.state.jobs);
-   console.log(this.state.jobs[this.state.jobs.findIndex(x => x.jobid==evt.currentTarget.id)]);
-   var job =this.state.jobs[this.state.jobs.findIndex(x => x.jobid==evt.currentTarget.id)];
-
+   var job =this.props.jobs[this.props.jobs.findIndex(x => x.jobid==evt.currentTarget.id)];
    var obj = {
-     "host_ip" : "localhost",
+     "host_ip" : "SmartThink-Demo",
      "jobid" : job.jobid,
+     "host_port" : "9200",
+     "max_docs": "100000",
      "aggregationType" : job.aggregationType,
      "field" : job.field,
-     "startDate" : job.startDate,
-     "end_date" : job.endDate,
+     "startDate" :moment(job.startDate).format("YYYY-MM-DD HH:mm:ss.SSS"),
+     "endDate" : moment(job.endDate).format("YYYY-MM-DD HH:mm:ss.SSS"),
      "bucketSpan" : job.bucketSpan,
      "indexSetName" : job.indexSetName,
      "sourceindextype" : "message",
@@ -141,17 +112,17 @@ const JobsDisplay = React.createClass({
      "anom_type" : "anomaly_type",
      "anomaly_direction" : "both",
      "max_ratio_of_anomaly" : "0.02",
-     "alpha_parameter" : "0.1"
+     "alpha_parameter" : "0.1",
+     "streaming" : "FALSE"
    }
-
-console.log(obj ," starting obj");
+   console.log(obj ," starting obj");
    AggregatesActions.startJob(obj).then(response => {
      console.log(response);
    });
 },
 
-  render() {
-    if(!this.props.jobType) {
+  render() { 
+    if(!this.props.jobs) {
       return null
     }
     else {
@@ -163,43 +134,23 @@ console.log(obj ," starting obj");
       let chart = null;
 
       const filterKeys = ['jobid','field', 'aggregationType'];
-      const headers = ['Aggregation Type', 'Start Date', 'EndDate', 'Field', 'Job Id', 'Job Type'];
-      if(this.state.viewGraphContent) {
-          dispContent = ( <ViewGraph jobid={this.state.currentJobId} handler={this.handler}/> )
-      }
-      else {
-          if(this.state.createJobForm ) {
-            dispContent = (
-              <div>
-                <CreateJobForm handelState={tmpl.handler} />
-                <div id="graph"></div>
-              </div>
-            );
-          }
-          else {
-            dispContent = (
-              <DataTable id="job-list"
-              className="table-hover"
-              headers={headers}
-              headerCellFormatter={this._headerCellFormatter}
-              rows={this.state.jobs}
-              filterBy="field"
-              dataRowFormatter={this._ruleInfoFormatter}
-              filterLabel="Filter Jobs"
-              filterKeys={filterKeys}/>
-            );
-          }
-      }
-
+      const headers = ['Job Id', 'Stream Name',   'Aggregation Type', 'Field', 'Actions'];
+      dispContent = (
+        <DataTable id="job-list"
+        className="table-hover table-condensed table-striped"
+        headers={headers}
+        headerCellFormatter={this._headerCellFormatter}
+        rows={this.props.jobs}
+        filterBy="field"
+        noDataText="There are no anomaly jobs"
+        dataRowFormatter={this._ruleInfoFormatter}
+        filterLabel="Filter Jobs"
+        filterKeys={filterKeys}/>
+      );
         return (
-          <div>
-          <Button className="buttonColor buttonBg" onClick={this.showCreateJobForm}>Create Job </Button>
             <PageHeader>
-                <div>
                   {dispContent}
-                </div>
             </PageHeader>
-          </div>
         );
     }
     },

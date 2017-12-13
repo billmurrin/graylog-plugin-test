@@ -13,6 +13,7 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
 import org.graylog.plugins.machinelearning.Machinelearning;
+import org.graylog.plugins.machinelearning.job.JobServiceImpl;
 import org.graylog.plugins.machinelearning.job.Rule;
 import org.graylog.plugins.machinelearning.job.rest.models.JobConfiguration;
 import org.graylog.plugins.machinelearning.job.rest.models.StartJobConfiguration;
@@ -29,6 +30,8 @@ import org.graylog2.plugin.indexer.searches.timeranges.RelativeRange;
 import org.graylog2.plugin.rest.PluginRestResource;
 import org.graylog2.shared.initializers.JerseyService;
 import org.graylog2.shared.rest.resources.RestResource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.validation.Valid;
@@ -55,6 +58,7 @@ import static org.joda.time.DateTimeZone.UTC;
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public class JobActions extends RestResource implements PluginRestResource {
+    private static final Logger LOG = LoggerFactory.getLogger(JobServiceImpl.class);
 
     @POST
     @Timed
@@ -86,9 +90,13 @@ public class JobActions extends RestResource implements PluginRestResource {
             json.put("anomaly_direction" , obj.anomalyDirection() );
             json.put("max_ratio_of_anomaly" , obj.maxRatioOfAnomaly());
             json.put("alpha_parameter" , obj.alphaParameter());
+            json.put("host_port" , obj.hostPort());
+            json.put("max_docs" , obj.maxDocs());
+            json.put("streaming" , obj.streaming());
             CloseableHttpClient httpClient = HttpClientBuilder.create().build();
 
-            System.out.println(json.toJSONString()+ "Json");
+
+            LOG.info("json object"+ json.toJSONString());
             try {
                 HttpPost request = new HttpPost("http://localhost:8004/ocpu/library/smartthink/R/smartanomaly/json");
                 StringEntity params = new StringEntity(json.toString());
