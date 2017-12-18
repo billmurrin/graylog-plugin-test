@@ -112,7 +112,7 @@ const ForecastingCreatePage = React.createClass({
     var streams = this.state.streams;
     job.jobType ="forecasting";
     job.streamName =streams[streams.findIndex(x => x.id==job.streamId)].title;
-    fetch('PUT', URLUtils.qualifyUrl("/plugins/org.graylog.plugins.machinelearning/rules"), {job: this.state.job}).then(callback, failCallback);
+    fetch('PUT', URLUtils.qualifyUrl( "/plugins/org.graylog.plugins.machinelearning/rules"), {job: this.state.job}).then(callback, failCallback);
   },
 
   _onValueChanged(event) {
@@ -126,16 +126,13 @@ const ForecastingCreatePage = React.createClass({
   },
   _showGraph() {
     let tmpl = this;
-    console.log("show graph");
-    console.log(this.state.job);
     var job = this.state.job;
-    console.log(this.state.job);
     try {
         var data =   {
           "elastic_index_name": job.indexSetName+ "*",
           "field_name": job.field,
           "lucene_query": job.luceneQuery,
-          "time_stamp_field":"timestamp",
+          "time_stamp_field":"@timestamp",
           "aggregation_type": job.aggregationType,
           "bucket_span": job.bucketSpan,
 
@@ -153,6 +150,7 @@ const ForecastingCreatePage = React.createClass({
                 UserNotification.error(err);
           }
             var url = URLUtils.qualifyUrl("/plugins/org.graylog.plugins.machinelearning/jobs/graph/search");
+            console.log(data);
             fetch('POST', url, data).then(callback, failCallback);
         }
       catch(err) {

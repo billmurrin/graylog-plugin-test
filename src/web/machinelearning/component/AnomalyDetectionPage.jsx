@@ -18,7 +18,7 @@ const AnomalyDetectionPage = React.createClass({
   },
   handelState(){
     let tmpl = this;
-    AnomalyDetectionActions.list().then(jobs => {
+    AnomalyDetectionActions.list("anomaly").then(jobs => {
         tmpl.setState({jobs: jobs})
       });
   },
@@ -44,7 +44,7 @@ const AnomalyDetectionPage = React.createClass({
               </span>
             </PageHeader>
             <PageHeader >
-              <JobsDisplay jobs={this.state.jobs} handelState={this.handelState} />
+              <JobsDisplay  handelState={this.handelState} />
             </PageHeader>
           </div>
       );

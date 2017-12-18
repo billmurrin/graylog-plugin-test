@@ -83,4 +83,18 @@ public class RuleResource extends RestResource implements PluginRestResource {
         jobService.delete(jobid);
         return Response.accepted().build();
     }
+
+    @POST
+    @Path("/update/{jobid}")
+    @RequiresAuthentication
+    @ApiOperation(value = "Delete a job")
+    @ApiResponses(value = {
+            @ApiResponse(code = 404, message = "job not found."),
+    })
+    public Response updateStreaming(@ApiParam(name = "jobid", required = true)
+                           @PathParam("jobid") String jobid
+    ) throws NotFoundException, MongoException, UnsupportedEncodingException {
+        jobService.update(jobid);
+        return Response.accepted().build();
+    }
 }

@@ -25,4 +25,9 @@ public interface Job {
 
     public String getStreamId();
 
+
+    public String getDescription();
+
+    public Boolean getStreaming();
+
 }

@@ -112,7 +112,8 @@ const AnomalyDetectionCreatePage = React.createClass({
     var streams = this.state.streams;
     job.jobType ="anomaly";
     job.streamName =streams[streams.findIndex(x => x.id==job.streamId)].title;
-    fetch('PUT', URLUtils.qualifyUrl("/plugins/org.graylog.plugins.machinelearning/rules"), {job: this.state.job}).then(callback, failCallback);
+    console.log(job);
+    fetch('PUT', URLUtils.qualifyUrl("/plugins/org.graylog.plugins.machinelearning/rules"), {job: job}).then(callback, failCallback);
   },
 
   _onValueChanged(event) {
@@ -126,16 +127,13 @@ const AnomalyDetectionCreatePage = React.createClass({
   },
   _showGraph() {
     let tmpl = this;
-    console.log("show graph");
-    console.log(this.state.job);
     var job = this.state.job;
-    console.log(this.state.job);
     try {
         var data =   {
           "elastic_index_name": job.indexSetName+ "*",
           "field_name": job.field,
           "lucene_query": job.luceneQuery,
-          "time_stamp_field":"timestamp",
+          "time_stamp_field":"@timestamp",
           "aggregation_type": job.aggregationType,
           "bucket_span": job.bucketSpan,
 
@@ -143,7 +141,10 @@ const AnomalyDetectionCreatePage = React.createClass({
         var callback = function(res) {
           $("#graph svg").remove()
           tmpl._createGraph(res, function(status) {
-            if(status)tmpl.setState({saveJob: true})
+            if(status){
+              tmpl.setState({saveJob: true})
+              tmpl.setState({showGraph: true})
+            }
             else {
               tmpl.setState({saveJob: false})
             }
@@ -301,6 +302,35 @@ const AnomalyDetectionCreatePage = React.createClass({
     fetch('GET', url).then(callback, failCallback);
   },
   render() {
+    let graph = null;
+if(this.state.showGraph) {
+    graph = (
+      <div >
+        <PageHeader>
+        <Col sm={6}>
+          <Row sm={6}>
+            <Input ref="jobid" name="jobid" id="jobid" type="text" value={this.state.jobid}
+            labelClassName="col-sm-6" wrapperClassName="col-sm-6"
+            label="Job Name:" placeholder="Please type a Unique Name" required
+            onChange={this._onValueChanged} >
+            </Input>
+            <Input ref="description" name="description" id="description" type="text" value={this.state.jobid}
+            labelClassName="col-sm-6" wrapperClassName="col-sm-6"
+            label="Job Description" placeholder="Please type Job Description" required
+            onChange={this._onValueChanged} >
+            </Input>
+          </Row>
+          <Row sm={6}>
+          <Button  disabled={!this.state.saveJob}  className="buttonWidth" onClick={this._saveJob}  bsStyle="primary" >
+          <i className="fa fa-cloud"  title="Save job"></i>
+          </Button>
+          </Row>
+        </Col>
+        </PageHeader>
+      </div>
+    )
+
+}
     return (
       <div>
       <PageHeader title="Create Anomaly Detection Job">
@@ -361,22 +391,13 @@ const AnomalyDetectionCreatePage = React.createClass({
                     <i className="fa fa-play"  title="View job"></i>
                   </Button>
                 </Col>
-                <Col md={1}>
-                  <Button  disabled={!this.state.saveJob}  className="buttonWidth" onClick={this._saveJob}  bsStyle="primary" >
-                    <i className="fa fa-cloud"  title="Save job"></i>
-                  </Button>
-                </Col>
-              </Row>
-              <Row sm={6}>
-
               </Row>
             </Col>
           </fieldset>
+          <div id="graph"></div>
         </Form>
       </PageHeader>
-      <PageHeader>
-        <div id="graph"></div>
-      </PageHeader>
+      {graph}
       </div>
     );
   },

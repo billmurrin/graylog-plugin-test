@@ -176,7 +176,7 @@ public class JobResource extends RestResource implements PluginRestResource {
                         }
                     }
                     catch (Exception e) {
-//                    e.printStackTrace();
+                        e.printStackTrace();
                     }
                 }
             });
@@ -265,6 +265,7 @@ public class JobResource extends RestResource implements PluginRestResource {
             final String query = searchSource().aggregation(builder).toString();
 
             LOG.info("query"+ query);
+            LOG.info("obj.elasticIndexName()"+ obj.elasticIndexName());
             final Search request = new Search.Builder(query)
                     .addIndex(obj.elasticIndexName())
                     .setSearchType(SearchType.DFS_QUERY_THEN_FETCH)
@@ -282,9 +283,10 @@ public class JobResource extends RestResource implements PluginRestResource {
                         final Map<String, Object> resultMap = Maps.newHashMap();
                         resultMap.put("key_field", e.getKey());
                         resultMap.put("date", e.getKeyAsString());
+                        resultMap.put("dateobj", new DateTime(e.getKeyAsString()));
                         resultMap.put("count", e.getCount());
                         final StatsAggregation stats = e.getStatsAggregation(Searches.AGG_STATS);
-
+                        resultMap.put("price", stats.getMin()==null? 0: stats.getMin());
                         resultMap.put("min", stats.getMin()==null? 0: stats.getMin());
                         resultMap.put("max", stats.getMax()==null? 0: stats.getMax());
                         resultMap.put("total", stats.getSum()==null?0: stats.getSum());

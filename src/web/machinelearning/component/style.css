@@ -12,3 +12,18 @@
 	height: 34px;
 	width: 50px;
 }
+
+.actiontable {
+	width: 36rem;
+}
+
+ .line {
+        fill: none;
+        stroke: steelblue;
+        stroke-width: 1.5px;
+    }
+.zoom {
+  cursor: move;
+  fill: none;
+  pointer-events: all;
+}

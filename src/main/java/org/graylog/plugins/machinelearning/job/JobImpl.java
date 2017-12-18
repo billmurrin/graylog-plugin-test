@@ -80,6 +80,19 @@ public abstract class JobImpl implements Job{
     @NotNull
     public abstract String getStreamId();
 
+
+
+    @JsonProperty("streaming")
+    @Override
+    @Nullable
+    public abstract Boolean getStreaming();
+
+
+    @JsonProperty("description")
+    @Override
+    @Nullable
+    public abstract String getDescription();
+
     @JsonCreator
     public static JobImpl create( @JsonProperty("aggregationType") String aggregationType,
                                   @JsonProperty("field") String field,
@@ -91,9 +104,11 @@ public abstract class JobImpl implements Job{
                                   @JsonProperty("indexSetName") String  indexSetName,
                                   @JsonProperty("jobType") String  jobType,
                                   @JsonProperty("luceneQuery") String  luceneQuery,
-                                  @JsonProperty("streamId") String  streamId
+                                  @JsonProperty("streamId") String  streamId,
+                                  @JsonProperty("streaming") Boolean  streaming,
+                                  @JsonProperty("description") String  description
                                   ) {
-        return new AutoValue_JobImpl(aggregationType, field, startDate, endDate, streamName, jobid, bucketSpan, indexSetName, jobType, luceneQuery, streamId);
+        return new AutoValue_JobImpl(aggregationType, field, startDate, endDate, streamName, jobid, bucketSpan, indexSetName, jobType, luceneQuery, streamId, streaming, description);
     }
 
 

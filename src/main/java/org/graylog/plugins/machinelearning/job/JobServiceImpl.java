@@ -5,14 +5,19 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
 import com.mongodb.QueryBuilder;
+import org.bson.conversions.Bson;
+import org.bson.types.ObjectId;
 import org.graylog.plugins.machinelearning.job.rest.models.requests.AddJobRequest;
 import org.graylog2.bindings.providers.MongoJackObjectMapperProvider;
 import org.graylog2.database.CollectionName;
 import org.graylog2.database.MongoConnection;
+import org.graylog2.plugin.streams.Output;
+import org.graylog2.streams.StreamImpl;
 import org.graylog2.users.UserImpl;
 import org.mongojack.DBCursor;
 import org.mongojack.DBQuery;
 import org.mongojack.JacksonDBCollection;
+import org.mongojack.WriteResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,8 +47,15 @@ public class JobServiceImpl implements JobService {
     }
 
     @Override
-    public Job update(String name, Job job) {
-        return null;
+    public void update(String jobid) {
+        boolean streaming = false;
+        if(coll.findOne(new BasicDBObject("jobid", jobid)).getStreaming() ==null) {
+            streaming = true;
+        }
+        else {
+            streaming = !coll.findOne(new BasicDBObject("jobid", jobid)).getStreaming();
+        }
+        coll.update( new BasicDBObject("jobid", jobid), new BasicDBObject("$set",  new BasicDBObject("streaming", streaming )));
     }
 
 
@@ -80,7 +92,7 @@ public class JobServiceImpl implements JobService {
 
     @Override
     public Job fromRequest(AddJobRequest request) {
-          return JobImpl.create(request.getJob().getAggregationType(), request.getJob().getField(), request.getJob().getStartDate(), request.getJob().getEndDate(), request.getJob().getStreamName(), request.getJob().getJobid(), request.getJob().getBucketSpan(), request.getJob().getIndexSetName(), request.getJob().getJobType(), request.getJob().getLuceneQuery(), request.getJob().getStreamId());
+          return JobImpl.create(request.getJob().getAggregationType(), request.getJob().getField(), request.getJob().getStartDate(), request.getJob().getEndDate(), request.getJob().getStreamName(), request.getJob().getJobid(), request.getJob().getBucketSpan(), request.getJob().getIndexSetName(), request.getJob().getJobType(), request.getJob().getLuceneQuery(), request.getJob().getStreamId(), request.getJob().getStreaming(), request.getJob().getDescription());
     }
 
     private List<Job> toAbstractListType(DBCursor<JobImpl> job) {

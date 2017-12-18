@@ -37,11 +37,26 @@ const AnomalyDetectionStore = Reflux.createStore({
       .then(
         response => {
           UserNotification.success('Jod deleted');
+          return true;
         },
         error => {
           UserNotification.error('deleting job failed');
         });
     AnomalyDetectionActions.deletejob.promise(promise);
+  },
+  startStreaming(jobid){
+    console.log("startStreaming");
+    var url = URLUtils.qualifyUrl("/plugins/org.graylog.plugins.machinelearning/rules/update/"+jobid);
+    const promise = fetch('POST', url)
+      .then(
+        response => {
+          UserNotification.success('Streaming updated ');
+          return true
+        },
+        error => {
+          UserNotification.error('starting Streaming failed ');
+        });
+    AnomalyDetectionActions.startStreaming.promise(promise);
   },
 });
 

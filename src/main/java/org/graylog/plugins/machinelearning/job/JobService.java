@@ -6,8 +6,7 @@ import javax.ws.rs.core.Response;
 import java.util.List;
 
 public interface JobService {
-
-    Job update(String name, Job job);
+    void update(String jobid);
     Job fromRequest(AddJobRequest request);
     Job create(Job job);
     void delete(String jobid);
