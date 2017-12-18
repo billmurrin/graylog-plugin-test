@@ -3,3 +3,12 @@
     stroke: steelblue;
     stroke-width: 2px;
   }
+
+.heading {
+	padding-top: 30px;
+}
+
+.buttonWidth {
+	height: 34px;
+	width: 50px;
+}
