@@ -303,55 +303,73 @@ const AnomalyDetectionCreatePage = React.createClass({
   render() {
     return (
       <div>
-      <PageHeader title="Create Anomaly Detection Job" >
+      <PageHeader title="Create Anomaly Detection Job">
         <Form state={this.state} onChange={state => this.setState(state)}>
           <fieldset>
-            <Col sm={6}>
-            <Input ref="streamId" name="streamId" id="streamId" type="select" value={this.state.streamId}
-              labelClassName="col-sm-6" wrapperClassName="col-sm-6"
-              label="Select stream" help="Select a stream." required
-              onChange={this.handelStreamChange} > <option value="true">Select</option>
-              {this.state.opts}
-            </Input>
-            <Input ref="type" name="luceneQuery" id="luceneQuery" type="text" value={this.state.luceneQuery}
-              labelClassName="col-sm-6" wrapperClassName="col-sm-6"
-              label="Filter results (Lucene Search)" help="lucene Query" required
-              onChange={this._onValueChanged} >
-            </Input>
-            <Input ref="type" name="aggregationType" id="aggregationType" type="select" value={this.state.type}
-              labelClassName="col-sm-6" wrapperClassName="col-sm-6"
-              label="Aggregation Type" help="Select a aggregation type." required
-              onChange={this._onValueChanged} ><option value="true">Select</option>
-              {this.state.typeOPs}
-            </Input>
-            <Input ref="fields" name="field" id="fields" type="select" value={this.state.field}
-              labelClassName="col-sm-6" wrapperClassName="col-sm-6"
-              label="Select Field" help="Select a field." required
-              onChange={this._onValueChanged} > <option value="true">Select</option>{this.state.optsFields}
-            </Input>
-            <Input ref="bucketSpan" name="bucketSpan" id="bucketSpan" type="select" value={this.state.bucket}
-            labelClassName="col-sm-6" wrapperClassName="col-sm-6"
-            label="Select Aggregation Window  " help="Select time span." required
-            onChange={this._onValueChanged} > <option value="true">Select</option>{this.state.buck}
-            </Input>
-            <Input ref="jobid" name="jobid" id="jobid" type="text" value={this.state.jobid}
-            labelClassName="col-sm-6" wrapperClassName="col-sm-6"
-            label="Give an unique name for job " help="unique name." required
-            onChange={this._onValueChanged} >
-            </Input>
-            <Row sm={6}>
-              <Button   style={{   marginLeft:"150px" }}  onClick={this._showGraph}  bsStyle="primary" >
-              <i className="fa fa-play fa-2x"  title="View job"></i>
-              </Button>
-              <Button  disabled={!this.state.saveJob}  style={{   marginLeft:"250px" }} onClick={this._saveJob}  bsStyle="primary" >
-              <i className="fa fa-cloud fa-2x"  title="Save job"></i>
-              </Button>
-            </Row>
-            </Col>
-            <Col sm={6}>
-              <Button    bsStyle="primary small" >
-                <i className="fa fa-plus fa-2x"  title="Advanced "></i>
-              </Button>
+            <Col md={12} sm={12}>
+              <Row className="heading">
+                <Col md={5}>
+                  <Input ref="streamId" name="streamId" id="streamId" type="select" value={this.state.streamId}
+                    labelClassName="col-sm-6" wrapperClassName="col-sm-6"
+                    label="Select Stream:" required
+                    onChange={this.handelStreamChange} > <option value="true">Select a Stream</option>
+                    {this.state.opts}
+                  </Input>
+                </Col>
+                <Col md={5}>
+                  <Input ref="type" name="luceneQuery" id="luceneQuery" type="text" value={this.state.luceneQuery}
+                    labelClassName="col-sm-6" wrapperClassName="col-sm-6"
+                    label="Filter results (Lucene Search):" placeholder="Lucene Query" required
+                    onChange={this._onValueChanged} >
+                  </Input>
+                </Col>
+              </Row>
+              <Row>
+                <Col md={5}>
+                  <Input ref="type" name="aggregationType" id="aggregationType" type="select" value={this.state.type}
+                    labelClassName="col-sm-6" wrapperClassName="col-sm-6"
+                    label="Aggregation Type:" required
+                    onChange={this._onValueChanged} ><option value="true">Select an Aggregation type</option>
+                    {this.state.typeOPs}
+                  </Input>
+                </Col>
+                <Col md={5}>
+                  <Input ref="fields" name="field" id="fields" type="select" value={this.state.field}
+                    labelClassName="col-sm-6" wrapperClassName="col-sm-6"
+                    label="Select Field:" required
+                    onChange={this._onValueChanged} > <option value="true">Select a Field</option>{this.state.optsFields}
+                  </Input>
+                </Col>
+              </Row>
+              <Row>
+                <Col md={5}>
+                  <Input ref="bucketSpan" name="bucketSpan" id="bucketSpan" type="select" value={this.state.bucket}
+                  labelClassName="col-sm-6" wrapperClassName="col-sm-6"
+                  label="Select Aggregation Window:" required
+                  onChange={this._onValueChanged} > <option value="true">Select time span</option>{this.state.buck}
+                  </Input>
+                </Col>
+                <Col md={5}>
+                  <Input ref="jobid" name="jobid" id="jobid" type="text" value={this.state.jobid}
+                  labelClassName="col-sm-6" wrapperClassName="col-sm-6"
+                  label="Job Name:" placeholder="Please type a Unique Name" required
+                  onChange={this._onValueChanged} >
+                  </Input>
+                </Col>
+                <Col md={1}>
+                  <Button onClick={this._showGraph}  className="buttonWidth" bsStyle="primary" >
+                    <i className="fa fa-play"  title="View job"></i>
+                  </Button>
+                </Col>
+                <Col md={1}>
+                  <Button  disabled={!this.state.saveJob}  className="buttonWidth" onClick={this._saveJob}  bsStyle="primary" >
+                    <i className="fa fa-cloud"  title="Save job"></i>
+                  </Button>
+                </Col>
+              </Row>
+              <Row sm={6}>
+
+              </Row>
             </Col>
           </fieldset>
         </Form>
