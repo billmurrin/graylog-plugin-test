@@ -216,7 +216,7 @@
 //       body: {
 //         "query": {
 //           "range": {
-//             "@timestamp": {
+//             "timestamp": {
 //               "gte": start,
 //               "lte": end,
 //             }
@@ -225,7 +225,7 @@
 //         aggs: {
 //           bucket_time: {
 //             "date_histogram": {
-//               "field": "@timestamp",
+//               "field": "timestamp",
 //               "interval": this.state.job.buckets,
 //             },
 //             aggs: {

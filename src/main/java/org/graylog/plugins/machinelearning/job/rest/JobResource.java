@@ -196,7 +196,7 @@ public class JobResource extends RestResource implements PluginRestResource {
 //            "end_date": "2018-01-01 18:00:00",
 //            "field_name": "response",
 //            "query_size": 1212,
-//            "time_stamp_field":"@timestamp"
+//            "time_stamp_field":"timestamp"
 //
 //
 //    }

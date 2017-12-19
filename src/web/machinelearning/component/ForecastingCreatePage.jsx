@@ -132,7 +132,7 @@ const ForecastingCreatePage = React.createClass({
           "elastic_index_name": job.indexSetName+ "*",
           "field_name": job.field,
           "lucene_query": job.luceneQuery,
-          "time_stamp_field":"@timestamp",
+          "time_stamp_field":"timestamp",
           "aggregation_type": job.aggregationType,
           "bucket_span": job.bucketSpan,
 

@@ -168,7 +168,7 @@ createInteractiveGraph() {
         "elastic_index_name": "manju"+ "*",
           "field_name": "response",
         "lucene_query": "*",
-        "time_stamp_field":"@timestamp",
+        "time_stamp_field":"timestamp",
         "aggregation_type": "mean",
         "bucket_span": "15m",
 
