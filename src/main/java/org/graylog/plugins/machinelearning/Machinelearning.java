@@ -1,13 +1,31 @@
 package org.graylog.plugins.machinelearning;
 
 
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.inject.Inject;
+
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.util.EntityUtils;
+import org.graylog.plugins.machinelearning.job.Job;
+import org.graylog.plugins.machinelearning.job.JobService;
 import org.graylog.plugins.machinelearning.job.Rule;
 import org.graylog.plugins.machinelearning.job.RuleService;
+import org.graylog.plugins.machinelearning.job.rest.JobActions;
+import org.graylog.plugins.machinelearning.job.rest.models.StartJobConfiguration;
 import org.graylog2.indexer.results.TermsResult;
 import org.graylog2.indexer.searches.Searches;
 import org.graylog2.indexer.searches.SearchesClusterConfig;
@@ -23,6 +41,7 @@ import org.joda.time.Period;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.google.common.annotations.VisibleForTesting;
+import sun.net.www.http.HttpClient;
 
 /**
  * This is the plugin. Your class should implement one of the existing plugin
@@ -35,113 +54,74 @@ public class Machinelearning extends Periodical {
 	private final ClusterConfigService clusterConfigService;
 	private final Searches searches;
 	private final Cluster cluster;
-	private final RuleService ruleService;
+	private final JobService jobService;
 
 
 
 	private static final Logger LOG = LoggerFactory.getLogger(Machinelearning.class);
-	private List<Rule> list;
+	private List<Job> list;
 
 	@Inject
 	public Machinelearning(Searches searches, ClusterConfigService clusterConfigService,
-						   Cluster cluster, RuleService ruleService ) {
+						   Cluster cluster, JobService jobService) {
 		this.searches = searches;
 		this.clusterConfigService = clusterConfigService;
 		this.cluster = cluster;
-		this.ruleService = ruleService;
+		this.jobService = jobService;
 	}
 
 	@VisibleForTesting
 	boolean shouldRun(){
+		System.out.println(cluster.isHealthy());
 		return cluster.isHealthy();
 	}
 
 
 	@Override
 	public void doRun() {
-
+	System.out.println("Runing periodical");
 		if (!shouldRun()) {
 			LOG.warn("Indexer is not running, not checking any rules this run.");
 		} else {
-			list = ruleService.all();
+			list = jobService.all("all");
 
-			if (sequence == maxInterval) {
-				sequence = 0;
-			}
+			for (Job job : list) {
 
-			sequence++;
-
-			for (Rule rule : list) {
-				if (!rule.isEnabled()){
-					LOG.debug("Rule '" + rule.getName() + "' is disabled, skipping.");
+				if (!job.getStreaming()){
+					LOG.debug("Job'" + job.getJobid() + "' is disabled, skipping.");
 					continue;
 				}
 
-				int interval_minutes = rule.getInterval();
-
-
-				if (interval_minutes > maxInterval) {
-					maxInterval = rule.getInterval();
+				CloseableHttpClient httpClient = HttpClientBuilder.create().build();
+				HttpPost httpPost = new HttpPost("http://localhost:8004/ocpu/library/smartthink/R/smartanomaly/json");
+				// Request parameters and other properties.
+				List<NameValuePair> params = new ArrayList<NameValuePair>();
+				params.add(new BasicNameValuePair("user", "Bob"));
+				System.out.println("params added");
+				try {
+					httpPost.setEntity(new UrlEncodedFormEntity(params, "UTF-8"));
+				} catch (UnsupportedEncodingException e) {
+					// writing error to Log
+					e.printStackTrace();
 				}
-
-				//always evaluate when isSliding()
-				if (rule.isSliding() || sequence % interval_minutes == 0) {
-
-					String field = rule.getField();
-
-					List<String> unique_field_list = new ArrayList<String>();
-					unique_field_list.add(field);
-
-					long numberOfMatches = rule.getNumberOfMatches();
-					boolean matchMoreOrEqual = rule.isMatchMoreOrEqual();
-
-					//TODO: make limit configurable
-					int limit = 100;
-
-					String query = rule.getQuery();
-					String streamId = rule.getStreamId();
-
-					if (streamId != null && streamId != ""){
-						query = query + " AND streams:" + streamId;
+				/*
+				 * Execute the HTTP Request
+				 */
+				try {
+					HttpResponse response = httpClient.execute(httpPost);
+					HttpEntity respEntity = response.getEntity();
+					if (respEntity != null) {
+						// EntityUtils to get the response content
+						String content =  EntityUtils.toString(respEntity);
+						System.out.println(content+ "contentcontentcontent");
 					}
-
-
-
-
-					final TimeRange timeRange = buildRelativeTimeRange(60 * interval_minutes);
-					if (null != timeRange) {
-						TermsResult result = searches.terms(field, limit, query, /*filter,*/ timeRange);
-
-
-						LOG.debug("built query: " + result.getBuiltQuery());
-
-
-						Map<String, Long> matchedTerms = new HashMap<String, Long>();
-						long ruleCount = 0;
-
-						for (Map.Entry<String, Long> term : result.getTerms().entrySet()){
-
-							String matchedFieldValue = term.getKey();
-							Long count = term.getValue();
-
-							if ((matchMoreOrEqual && count >= numberOfMatches)
-									|| (!matchMoreOrEqual && count < numberOfMatches)) {
-
-								LOG.info(count + " found for " + field + "=" + matchedFieldValue);
-
-								matchedTerms.put(matchedFieldValue, count);
-
-								ruleCount += count;
-							}
-
-						}
-
-
-
-					}
-
+				} catch (ClientProtocolException e) {
+					// writing exception to log
+					e.printStackTrace();
+				} catch (IOException e) {
+					// writing exception to log
+					e.printStackTrace();
 				}
-
 			}
 		}
 
@@ -189,6 +169,7 @@ public class Machinelearning extends Periodical {
 	public int getPeriodSeconds() {
 		return 60;
 	}
+
 
 	@Override
 	public boolean isDaemon() {

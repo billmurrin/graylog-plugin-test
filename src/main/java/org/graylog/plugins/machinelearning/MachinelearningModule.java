@@ -39,7 +39,7 @@ public class MachinelearningModule extends PluginModule {
 
 //    	bind(HistoryItemService.class).to(HistoryItemServiceImpl.class);
     	
-//        addPeriodical(Machinelearning.class);
+        addPeriodical(Machinelearning.class);
 //        addPeriodical(AggregatesReport.class);
 //        addPeriodical(AggregatesMaintenance.class);
 //        addPermissions(RuleRestPermissions.class);

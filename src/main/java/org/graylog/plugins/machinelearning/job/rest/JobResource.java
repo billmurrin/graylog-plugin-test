@@ -283,15 +283,14 @@ public class JobResource extends RestResource implements PluginRestResource {
                         final Map<String, Object> resultMap = Maps.newHashMap();
                         resultMap.put("key_field", e.getKey());
                         resultMap.put("date", e.getKeyAsString());
-                        resultMap.put("dateobj", new DateTime(e.getKeyAsString()));
                         resultMap.put("count", e.getCount());
                         final StatsAggregation stats = e.getStatsAggregation(Searches.AGG_STATS);
-                        resultMap.put("price", stats.getMin()==null? 0: stats.getMin());
-                        resultMap.put("min", stats.getMin()==null? 0: stats.getMin());
-                        resultMap.put("max", stats.getMax()==null? 0: stats.getMax());
-                        resultMap.put("total", stats.getSum()==null?0: stats.getSum());
-                        resultMap.put("total_count", stats.getCount()==null?0: stats.getCount());
-                        resultMap.put("mean", stats.getAvg()==null?0 :stats.getAvg());
+                        resultMap.put("price", stats.getMin());
+                        resultMap.put("min", stats.getMin());
+                        resultMap.put("max", stats.getMax());
+                        resultMap.put("total", stats.getSum());
+                        resultMap.put("total_count", stats.getCount());
+                        resultMap.put("mean", stats.getAvg());
                         return resultMap;
                     }).collect(Collectors.toList());
 

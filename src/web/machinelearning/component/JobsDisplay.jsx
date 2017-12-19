@@ -14,6 +14,7 @@ import { BootstrapTable, TableHeaderColumn } from 'react-bootstrap-table';
 import "machinelearning/style.css"
 import GraphPage from 'machinelearning/GraphPage'
 import CreateJobForm from './CreateJobForm'
+import JobResultDisplay from './JobResultDisplay'
 import ViewGraph from 'machinelearning/ViewGraph'
 import BootstrapModalForm from 'components/bootstrap/BootstrapModalForm';
 import Input from 'components/bootstrap/Input';
@@ -29,8 +30,9 @@ import CombinedProvider from 'injection/CombinedProvider';
 const { AlertNotificationsStore } = CombinedProvider.get('AlertNotifications');
 import AnomalyDetectionActions from 'machinelearning/actions/AnomalyDetectionActions';
 import * as d3 from "d3";
-
 import "./style.css"
+import { RingLoader } from 'react-spinners';
+
 
 const JobsDisplay = React.createClass({
   componentDidMount(){
@@ -125,7 +127,7 @@ _startStreaming(evt){
     });
 },
  _viewjob(evt) {
-   this.createInteractiveGraph();
+  //  this.createInteractiveGraph();
    this.setState({viewGraphContent: true })
    this.setState({currentJobId:evt.currentTarget.id})
 },
@@ -164,7 +166,7 @@ createInteractiveGraph() {
   try {
       var data =   {
         "elastic_index_name": "manju"+ "*",
-        "field_name": "response",
+          "field_name": "response",
         "lucene_query": "*",
         "time_stamp_field":"@timestamp",
         "aggregation_type": "mean",
@@ -335,6 +337,7 @@ createInteractiveGraph() {
       let dispContent = null;
       let table = null;
       let chart = null;
+      let jobResult = null;
 
       const filterKeys = ['jobid','field', 'aggregationType'];
       const headers = ['Job Id', 'Stream Name',   'Aggregation Type', 'Field', 'Actions'];
@@ -350,11 +353,23 @@ createInteractiveGraph() {
         filterLabel="Filter Jobs"
         filterKeys={filterKeys}/>
       );
+
+      // dispContent += (
+      //   <RingLoader
+      //      color={'#123abc'}
+      //      loading={true}
+      //    />
+      // )
+      if(tmpl.state.viewGraphContent) {
+        jobResult=<JobResultDisplay jobid={tmpl.state.currentJobId}/>
+      }
         return (
-            <PageHeader>
+            <div>
+              <PageHeader>
                   {dispContent}
-                  <svg width="960" height="500"></svg>
-            </PageHeader>
+              </PageHeader>
+              {jobResult}
+            </div>
         );
     }
     },

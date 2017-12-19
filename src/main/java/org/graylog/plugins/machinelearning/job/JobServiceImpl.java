@@ -64,7 +64,13 @@ public class JobServiceImpl implements JobService {
 
         final DBObject query = new BasicDBObject();
         query.put("jobType", type);
-        return  toAbstractListType(coll.find(query));
+        if(type == "all") {
+            return toAbstractListType(coll.find());
+        }
+        else  {
+            return  toAbstractListType(coll.find(query));
+        }
+
 }
 
 
