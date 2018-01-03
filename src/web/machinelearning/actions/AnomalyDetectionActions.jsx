@@ -5,6 +5,7 @@ const AnomalyDetectionActions = Reflux.createActions({
   deletejob: { asyncResult: true },
   startStreaming: { asyncResult: true },
   startJob: { asyncResult: true },
+  getFields: { asyncResult: true },
 });
 
 export default AnomalyDetectionActions;

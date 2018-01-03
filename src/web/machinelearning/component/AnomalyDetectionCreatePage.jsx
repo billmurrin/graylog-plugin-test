@@ -1,6 +1,6 @@
 import React from 'react';
 import $ from 'jquery';
-import SchedulesActions from 'machinelearning/SchedulesActions';
+import IndexFieldsAction from 'machinelearning/actions/IndexFieldsAction';
 import Reflux from 'reflux';
 import { IfPermitted, PageHeader } from 'components/common';
 import { Row, Col, Button, ButtonToolbar } from 'react-bootstrap';
@@ -18,7 +18,7 @@ import "./style.css"
 import { Line } from "react-chartjs";
 import UserNotification from 'util/UserNotification';
 import { browserHistory } from 'react-router';
-
+import MachinelearningActions from 'machinelearning/MachinelearningActions';
 import Routes from 'routing/Routes';
 
 
@@ -270,6 +270,7 @@ const AnomalyDetectionCreatePage = React.createClass({
      cb(true);
   },
   handelStreamChange(evt){
+    console.log("sta");
     let tmpl = this;
     var streamId = evt.currentTarget.value;
     var  job = this.state.job;
@@ -283,8 +284,8 @@ const AnomalyDetectionCreatePage = React.createClass({
       console.log(res);
       job.indexSetName = res.index_prefix;
       tmpl.setState({ job: job });
-      console.log(job.indexSetName+"*");
-      SchedulesActions.getFields( job.indexSetName+"*").then(fields => {
+      console.log("job", IndexFieldsAction);
+      IndexFieldsAction.getmanju( job.indexSetName+"*").then(fields => {
         var arrTen = [];
         console.log(fields);
         fields.map(function(k) {

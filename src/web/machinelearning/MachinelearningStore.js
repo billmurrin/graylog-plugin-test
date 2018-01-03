@@ -11,7 +11,7 @@ const MachinelearningStore = Reflux.createStore({
   listenables: [MachinelearningActions],
   sourceUrl: '/plugins/org.graylog.plugins.machinelearning/mlJobs',
   init() {
-
+    this.trigger({ jobs: this.jobs });
     //
   },
   getFields(){
@@ -20,9 +20,6 @@ const MachinelearningStore = Reflux.createStore({
       .then(
         response => {
           console.log(response);
-     // this.jobs = response.jobs;
-          // this.trigger({ jobs: this.jobs });
-          // return this.jobs;
         },
         error => {
           UserNotification.error(`Fetching aggregate rules failed with status: ${error}`,

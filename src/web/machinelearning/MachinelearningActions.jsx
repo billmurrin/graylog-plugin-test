@@ -1,7 +1,7 @@
 import Reflux from 'reflux';
 
 const MachinelearningActions = Reflux.createActions({
-  getFields: { asyncResult: false },
+  getFields: { asyncResult: true },
 });
 
 export default MachinelearningActions;

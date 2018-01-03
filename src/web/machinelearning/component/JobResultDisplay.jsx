@@ -12,7 +12,6 @@ import fetch from 'logic/rest/FetchProvider';
 import { BootstrapTable, TableHeaderColumn } from 'react-bootstrap-table';
 import "machinelearning/style.css"
 import GraphPage from 'machinelearning/GraphPage'
-import CreateJobForm from './CreateJobForm'
 import ViewGraph from 'machinelearning/ViewGraph'
 import BootstrapModalForm from 'components/bootstrap/BootstrapModalForm';
 import Input from 'components/bootstrap/Input';

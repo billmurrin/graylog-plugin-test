@@ -6,6 +6,7 @@ import { Row, Col, Button } from 'react-bootstrap';
 import {FormGroup, ControlLabel, FormControl} from 'react-bootstrap';
 import { LinkContainer } from 'react-router-bootstrap';
 import AggregatesActions from './AggregatesActions';
+import IndexFieldsAction from 'machinelearning/actions/IndexFieldsAction';
 // import StreamSelactBox from './StreamSelactBox';
 import { IfPermitted, PageHeader } from 'components/common';
 import fetch from 'logic/rest/FetchProvider';
@@ -213,7 +214,7 @@ const MachineLearningPage = React.createClass({
       var callback = function(res) {
         job.indexSetName = res.index_prefix;
         tmpl.setState({ job: job });
-        SchedulesActions.getFields( job.indexSetName+"_0").then(fields => {
+        IndexFieldsAction.getFields( job.indexSetName+"_0").then(fields => {
           var arrTen = [];
           fields.map(function(k) {
             arrTen.push(<option key={k} value={k}> {k} </option>);

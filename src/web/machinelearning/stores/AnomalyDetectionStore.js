@@ -3,9 +3,7 @@ import URLUtils from 'util/URLUtils';
 import UserNotification from 'util/UserNotification';
 import fetch from 'logic/rest/FetchProvider';
 import AnomalyDetectionActions from 'machinelearning/actions/AnomalyDetectionActions';
-import AppConfig from 'util/AppConfig';
-const fetchOpenCpu = require('logic/rest/FetchProvider').fetchOpenCpu;
-import moment from 'moment';
+
 
 
 const AnomalyDetectionStore = Reflux.createStore({

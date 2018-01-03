@@ -4,7 +4,6 @@ import webpackEntry from 'webpack-entry';
 import packageJson from '../../package.json'
 import { PluginManifest, PluginStore } from 'graylog-web-plugin/plugin'
 
-import MachineLearningPage from 'machinelearning/MachineLearningPage'
 import MachineLearningStartPage from 'machinelearning/component/MachineLearningStartPage'
 import GraphPage from 'machinelearning/GraphPage'
 import AnomalyDetectionPage from 'machinelearning/component/AnomalyDetectionPage'
