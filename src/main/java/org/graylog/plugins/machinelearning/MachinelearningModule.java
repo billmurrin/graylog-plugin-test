@@ -4,7 +4,7 @@ import org.graylog.plugins.machinelearning.job.JobService;
 import org.graylog.plugins.machinelearning.job.JobServiceImpl;
 import org.graylog.plugins.machinelearning.job.rest.JobActions;
 import org.graylog.plugins.machinelearning.job.rest.JobResource;
-import org.graylog.plugins.machinelearning.job.rest.MlJobResource;
+import org.graylog.plugins.machinelearning.job.rest.MlJobResource ;
 import org.graylog2.plugin.PluginConfigBean;
 import org.graylog2.plugin.PluginModule;
 

@@ -7,14 +7,18 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import javax.inject.Inject;
+import javax.ws.rs.core.Response;
 
+import net.minidev.json.JSONObject;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -26,6 +30,7 @@ import org.graylog.plugins.machinelearning.job.Rule;
 import org.graylog.plugins.machinelearning.job.RuleService;
 import org.graylog.plugins.machinelearning.job.rest.JobActions;
 import org.graylog.plugins.machinelearning.job.rest.models.StartJobConfiguration;
+import org.graylog2.configuration.ElasticsearchClientConfiguration;
 import org.graylog2.indexer.results.TermsResult;
 import org.graylog2.indexer.searches.Searches;
 import org.graylog2.indexer.searches.SearchesClusterConfig;
@@ -56,18 +61,19 @@ public class Machinelearning extends Periodical {
 	private final Cluster cluster;
 	private final JobService jobService;
 
-
+	private final ElasticsearchClientConfiguration elasticConfiguration;
 
 	private static final Logger LOG = LoggerFactory.getLogger(Machinelearning.class);
 	private List<Job> list;
 
 	@Inject
 	public Machinelearning(Searches searches, ClusterConfigService clusterConfigService,
-						   Cluster cluster, JobService jobService) {
+						   Cluster cluster, JobService jobService, ElasticsearchClientConfiguration elasticsearchClientConfiguration) {
 		this.searches = searches;
 		this.clusterConfigService = clusterConfigService;
 		this.cluster = cluster;
 		this.jobService = jobService;
+		this.elasticConfiguration = elasticsearchClientConfiguration;
 	}
 
 	@VisibleForTesting
@@ -78,7 +84,7 @@ public class Machinelearning extends Periodical {
 
 
 	@Override
-	public void doRun() {
+	public void doRun()  {
 	System.out.println("Runing periodical");
 		if (!shouldRun()) {
 			LOG.warn("Indexer is not running, not checking any rules this run.");
@@ -92,36 +98,59 @@ public class Machinelearning extends Periodical {
 					continue;
 				}
 
+				final List<String> hosts = elasticConfiguration.getElasticsearchHosts().stream()
+						.map(hostUri -> {
+							return hostUri.toString();
+						})
+						.collect(Collectors.toList());
+				JSONObject json = new JSONObject();
+				json.put("jobid", job.getJobid());
+				json.put("aggregationType", job.getAggregationType());
+				json.put("field", job.getField());
+				json.put("elastic_url", hosts.get(0));
+
+				json.put("indexSetName" , job.getIndexSetName());
+				json.put("sourceindextype" , "message");
+
+				json.put("bucketSpan" , job.getBucketSpan());
+				json.put("timestampfield" , "timestamp");
+				json.put("max_docs" , 1000000);
+				json.put("anomaly_direction" , "both");
+				json.put("max_ratio_of_anomaly" , "0.10");
+				json.put("alpha_parameter" , "0.1");
+				json.put("gelf_url", "localhost:12201/gelf");
+				json.put("streaming" , "T");
+				json.put("query" , job.getLuceneQuery());
+
 				CloseableHttpClient httpClient = HttpClientBuilder.create().build();
-				HttpPost httpPost = new HttpPost("http://localhost:8004/ocpu/library/smartthink/R/smartanomaly/json");
-				// Request parameters and other properties.
-				List<NameValuePair> params = new ArrayList<NameValuePair>();
-				params.add(new BasicNameValuePair("user", "Bob"));
-				System.out.println("params added");
+				System.out.println(json.toJSONString().toString()+ "json string");
 				try {
-					httpPost.setEntity(new UrlEncodedFormEntity(params, "UTF-8"));
-				} catch (UnsupportedEncodingException e) {
-					// writing error to Log
-					e.printStackTrace();
-				}
-				/*
-				 * Execute the HTTP Request
-				 */
-				try {
-					HttpResponse response = httpClient.execute(httpPost);
-					HttpEntity respEntity = response.getEntity();
-					if (respEntity != null) {
-						// EntityUtils to get the response content
-						String content =  EntityUtils.toString(respEntity);
-						System.out.println(content+ "contentcontentcontent");
+					HttpPost request = new HttpPost("http://localhost:8004/ocpu/library/smartthink/R/smartanomaly/json");
+					StringEntity params = new StringEntity(json.toString());
+					request.addHeader("content-type", "application/json");
+					request.setEntity(params);
+					HttpResponse result = httpClient.execute(request);
+
+					String json1 = EntityUtils.toString(result.getEntity(), "UTF-8");
+					if (result.getStatusLine().getStatusCode()== 201) {
+						LOG.info("job streaming is success :"+job.getJobid());
 					}
-				} catch (ClientProtocolException e) {
-					// writing exception to log
-					e.printStackTrace();
-				} catch (IOException e) {
-					// writing exception to log
-					e.printStackTrace();
+					else {
+						LOG.info("job streaming is failed with messge :"+json1);
+					}
+
+				} catch (Exception ex) {
+					ex.printStackTrace();
+				} finally {
+					try {
+						httpClient.close();
+
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+
 				}
+
 			}
 		}
 
@@ -167,7 +196,7 @@ public class Machinelearning extends Periodical {
 
 	@Override
 	public int getPeriodSeconds() {
-		return 300000;
+		return 1800;
 	}
 
 

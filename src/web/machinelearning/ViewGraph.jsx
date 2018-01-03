@@ -13,11 +13,6 @@ import * as d3 from "d3";
 
 const MachineLearningPage = React.createClass({
   componentDidMount(){
-    // TODO: fix this ASAP
-    // AggregatesActions.getJobs2().then(jobData => {
-    //   console.log(jobData);
-    //   // tmpl.setState({ jobs: jobs });
-    // });
     let tmpl = this;
     console.log(this.props);
       var obj = {

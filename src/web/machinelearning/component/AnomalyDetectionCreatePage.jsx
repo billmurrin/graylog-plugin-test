@@ -18,7 +18,7 @@ import "./style.css"
 import { Line } from "react-chartjs";
 import UserNotification from 'util/UserNotification';
 import { browserHistory } from 'react-router';
-import MachinelearningActions from 'machinelearning/MachinelearningActions';
+import SchedulesActions from 'machinelearning/SchedulesActions';
 import Routes from 'routing/Routes';
 
 
@@ -279,22 +279,28 @@ const AnomalyDetectionCreatePage = React.createClass({
     if(!job)  job = {};
     job[parameter] =value;
     var url = URLUtils.qualifyUrl("/system/indices/index_sets/"+ $(evt.target).find('option:selected').attr('id'));
-    console.log(url);
     var callback = function(res) {
       console.log(res);
       job.indexSetName = res.index_prefix;
       tmpl.setState({ job: job });
-      console.log("job", IndexFieldsAction);
-      IndexFieldsAction.getmanju( job.indexSetName+"*").then(fields => {
-        var arrTen = [];
-        console.log(fields);
-        fields.map(function(k) {
-          arrTen.push(<option key={k} value={k}> {k} </option>);
-        })
-        tmpl.setState({
-          optsFields: arrTen
-        });
-      });
+      console.log(SchedulesActions);
+      var url = URLUtils.qualifyUrl("/plugins/org.graylog.plugins.machinelearning/jobs/fields/")+ job.indexSetName+"*";
+      console.log(url);
+      fetch('POST', url )
+        .then(
+          fields => {
+            var arrTen = [];
+            fields.map(function(k) {
+              arrTen.push(<option key={k} value={k}> {k} </option>);
+            })
+            tmpl.setState({
+              optsFields: arrTen
+            });
+          },
+          error => {
+            UserNotification.error(`Fetching schedules failed with status: ${error}`,
+              'Could not retrieve schedules');
+          });
     }
     var failCallback = function(err) {
       console.log(err);
@@ -379,14 +385,8 @@ if(this.state.showGraph) {
                   onChange={this._onValueChanged} > <option value="true">Select time span</option>{this.state.buck}
                   </Input>
                 </Col>
-                <Col md={5}>
-                  <Input ref="jobid" name="jobid" id="jobid" type="text" value={this.state.jobid}
-                  labelClassName="col-sm-6" wrapperClassName="col-sm-6"
-                  label="Job Name:" placeholder="Please type a Unique Name" required
-                  onChange={this._onValueChanged} >
-                  </Input>
-                </Col>
-                <Col md={1}>
+
+                <Col md={6}>
                   <Button onClick={this._showGraph}  className="buttonWidth" bsStyle="primary" >
                     <i className="fa fa-play"  title="View job"></i>
                   </Button>

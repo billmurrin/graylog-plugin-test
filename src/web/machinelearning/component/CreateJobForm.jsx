@@ -194,13 +194,14 @@ const CreateJobForm = React.createClass({
   showGraph() {
     let tmpl = this;
     var job = this.state.job;
+    console.log("show graph");
     var data =   {
       "elastic_index_name": job.indexSetName+ "*",
       "start_date": moment(job.startDate).format("YYYY-MM-DD HH:mm:ss.SSS"),
       "end_date": moment(job.endDate).format("YYYY-MM-DD HH:mm:ss.SSS"),
       "field_name": job.field,
       "query_size": 100,
-      "time_stamp_field":"@timestamp"
+      "time_stamp_field":"timestamp"
     }
     var callback = function(res) {
       $("#graph svg").remove()

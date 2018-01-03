@@ -89,6 +89,7 @@ public class JobActions extends RestResource implements PluginRestResource {
             @Valid @NotNull StartJobConfiguration obj
     ){
         try {
+            LOG.info("start"+ "data");
             final List<String> hosts = elasticConfiguration.getElasticsearchHosts().stream()
                     .map(hostUri -> {
                         return hostUri.toString();
@@ -115,6 +116,8 @@ public class JobActions extends RestResource implements PluginRestResource {
 
             CloseableHttpClient httpClient = HttpClientBuilder.create().build();
             System.out.println(json.toJSONString().toString()+ "json string");
+            LOG.info(json.toJSONString().toString()+ "data");
+            LOG.debug(json.toJSONString().toString()+ "data");
 
             try {
                 HttpPost request = new HttpPost("http://localhost:8004/ocpu/library/smartthink/R/smartanomaly/json");
@@ -138,6 +141,8 @@ public class JobActions extends RestResource implements PluginRestResource {
                 }
 
             } catch (Exception ex) {
+                ex.printStackTrace();
+                LOG.info(ex.printStackTrace());
                 return Response.serverError().build();
             } finally {
                 httpClient.close();

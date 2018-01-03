@@ -14,8 +14,6 @@ const SchedulesStore = Reflux.createStore({
   },
 
   getFields(index) {
-    console.log(index);
-    console.log(this.sourceUrl);
     const promise = fetch('POST', URLUtils.qualifyUrl(this.sourceUrl)+"/"+index )
       .then(
         response => {
