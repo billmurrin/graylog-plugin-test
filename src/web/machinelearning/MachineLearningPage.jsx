@@ -103,8 +103,6 @@ const MachineLearningPage = React.createClass({
     };
     var callback = function(res) {
       var arrTen = [];
-      console.log(res);
-      // console.log(res.streams);
       res.streams.map(function(s) {
         arrTen.push(<option id={s.index_set_id} key={s.id} value={s.id}> {s.description} </option>);
       })
@@ -249,65 +247,11 @@ const MachineLearningPage = React.createClass({
            "query_size": 1212,
            "time_stamp_field":"timestamp"
          }
-console.log(re);
-fetch('POST', "http://localhost:9000/api/plugins/org.graylog.plugins.machinelearning/jobs/graph/search", result).then(function(r) {
-  console.log(r+ "result************8");
-
-}, function(er) {
-  console.log(er);
-
-});
-    // var query = {
-    //     "range": {
-    //       "timestamp": {
-    //         "gte": moment(job.startDate).format("YYYY-MM-DD HH:mm:ss.SSS"),
-    //         "lte": moment(job.endDate).format("YYYY-MM-DD HH:mm:ss.SSS")
-    //       }
-    //     }
-    // }
-    // var aggs = {
-    //       bucket_time: {
-    //         "date_histogram": {
-    //           "field": "timestamp",
-    //           "interval": this.state.job.bucketSpan,
-    //         },
-    //         aggs: {
-    //           "server_stats": {
-    //           }
-    //         }
-    //       }
-    //     }
-    //     aggs.bucket_time.aggs.server_stats[job.aggrigationType] = {"field": this.state.job.field}
-    //     console.log(JSON.stringify({query, aggs}));
-    //     client.search({
-    //       index: job.indexSetName+"_0",
-    //       body: {query, aggs}
-    //     }).then(function (resp) {
-    //       var hits = resp.hits.hits;
-    //       console.log(hits);
-    //       var d =    {
-    //         chartData: {
-    //           labels: [],
-    //           datasets: [
-    //             {
-    //               fillColor: "#25BDFF",
-    //               strokeColor: "#25BDFF",
-    //               data: []
-    //             }
-    //           ]
-    //         }}
-    //         resp.aggregations.bucket_time.buckets.map(function(b) {
-    //           d.chartData.labels.push(moment(b.key_as_string).format("YYYY-MM-DD"))
-    //           d.chartData.datasets[0].data.push(b.server_stats.value)
-    //         })
-    //         tmpl.setState({rawData:resp.aggregations.bucket_time.buckets});
-    //         tmpl.setState({chartData:d.chartData})
-    //         tmpl.setState({showLine:true})
-    //       }, function (err) {
-    //         // console.trace(err.message);
-    //       });
-        // this.setState({graphDisplayed: true})
-        return;
+  fetch('POST', "http://localhost:9000/api/plugins/org.graylog.plugins.machinelearning/jobs/graph/search", result).then(function(r) {
+    console.log(r+ "result************8");
+  }, function(er) {
+    console.log(er);
+  });
   },
   _save(){
     let tmpl = this;
@@ -320,7 +264,7 @@ fetch('POST', "http://localhost:9000/api/plugins/org.graylog.plugins.machinelear
           tmpl.setState({ jobs: jobs });
         });
     }
-    fetch('PUT', URLUtils.qualifyUrl("/plugins/org.graylog.plugins.machinelearning/rules"), {job: this.state.job}).then(callback, failCallback);
+    fetch('PUT', URLUtils.qualifyUrl("/plugins/org.graylog.plugins.machinelearning/mlJobs"), {job: this.state.job}).then(callback, failCallback);
   },
   _onDateSelected(field) {
     return (date, _, event) => {

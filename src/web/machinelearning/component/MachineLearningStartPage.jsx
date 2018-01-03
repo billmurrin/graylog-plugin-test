@@ -17,13 +17,10 @@ const MachineLearningStartPage = React.createClass({
     };
   },
   _handelClick(evt){
-    console.log("JobsDisplay" ,evt.currentTarget.id);
     let tmpl = this;
     AggregatesActions.getJobs(evt.currentTarget.id).then(jobs => {
       tmpl.setState({ jobs: jobs });
     });
-    console.log(this.state);
-    // this.setState({jobType: evt.currentTarget.id})
   },
   render() {
     let tmpl = this;

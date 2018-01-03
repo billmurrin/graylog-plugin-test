@@ -110,8 +110,7 @@ const AnomalyDetectionCreatePage = React.createClass({
     var streams = this.state.streams;
     job.jobType ="anomaly";
     job.streamName =streams[streams.findIndex(x => x.id==job.streamId)].title;
-    console.log(job);
-    fetch('PUT', URLUtils.qualifyUrl("/plugins/org.graylog.plugins.machinelearning/rules"), {job: job}).then(callback, failCallback);
+    fetch('PUT', URLUtils.qualifyUrl("/plugins/org.graylog.plugins.machinelearning/mlJobs"), {job: job}).then(callback, failCallback);
   },
 
   _onValueChanged(event) {
@@ -120,7 +119,6 @@ const AnomalyDetectionCreatePage = React.createClass({
     const value = event.target.type === 'checkbox' ? event.target.checked : event.target.value;
     if(!job)  job = {};
     job[parameter] = value.trim();
-    console.log(job);
     this.setState({ job: job });
   },
   _showGraph() {
@@ -280,12 +278,15 @@ const AnomalyDetectionCreatePage = React.createClass({
     if(!job)  job = {};
     job[parameter] =value;
     var url = URLUtils.qualifyUrl("/system/indices/index_sets/"+ $(evt.target).find('option:selected').attr('id'));
+    console.log(url);
     var callback = function(res) {
+      console.log(res);
       job.indexSetName = res.index_prefix;
       tmpl.setState({ job: job });
       console.log(job.indexSetName+"*");
       SchedulesActions.getFields( job.indexSetName+"*").then(fields => {
         var arrTen = [];
+        console.log(fields);
         fields.map(function(k) {
           arrTen.push(<option key={k} value={k}> {k} </option>);
         })

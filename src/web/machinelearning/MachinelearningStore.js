@@ -9,7 +9,7 @@ import moment from 'moment';
 
 const MachinelearningStore = Reflux.createStore({
   listenables: [MachinelearningActions],
-  sourceUrl: '/plugins/org.graylog.plugins.machinelearning/rules',
+  sourceUrl: '/plugins/org.graylog.plugins.machinelearning/mlJobs',
   init() {
 
     //

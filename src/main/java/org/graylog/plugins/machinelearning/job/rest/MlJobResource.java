@@ -27,16 +27,16 @@ import java.util.List;
 import org.graylog2.Configuration;
 
 @Api(value = "Machinelearning", description = " Machinelearning rest service.")
-    @Path("/rules")
+    @Path("/mlJobs")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-public class RuleResource extends RestResource implements PluginRestResource {
+public class MlJobResource extends RestResource implements PluginRestResource {
     private final JobService jobService;
     private final Configuration conf;
 
 
     @Inject
-    public RuleResource(JobService jobService, Configuration conf) {
+    public MlJobResource(JobService jobService, Configuration conf) {
         this.jobService = jobService;
         this.conf= conf;
 

@@ -85,7 +85,6 @@ const CreateJobForm = React.createClass({
     };
     var callback = function(res) {
       var arrTen = [];
-      console.log(res);
       tmpl.setState({
         streams: res
       })
@@ -149,7 +148,7 @@ const CreateJobForm = React.createClass({
         tmpl.setState({ jobs: jobs });
       });
     }
-    fetch('PUT', URLUtils.qualifyUrl("/plugins/org.graylog.plugins.machinelearning/rules"), {job: this.state.job}).then(callback, failCallback);
+    fetch('PUT', URLUtils.qualifyUrl("/plugins/org.graylog.plugins.machinelearning/mlJobs"), {job: this.state.job}).then(callback, failCallback);
   },
   _rangeParamsChanged(key) {
     var job = this.state.job;
@@ -194,19 +193,15 @@ const CreateJobForm = React.createClass({
   },
   showGraph() {
     let tmpl = this;
-    console.log("show graph");
-    console.log(this.state.job);
     var job = this.state.job;
-
     var data =   {
       "elastic_index_name": job.indexSetName+ "*",
       "start_date": moment(job.startDate).format("YYYY-MM-DD HH:mm:ss.SSS"),
       "end_date": moment(job.endDate).format("YYYY-MM-DD HH:mm:ss.SSS"),
       "field_name": job.field,
       "query_size": 100,
-      "time_stamp_field":"timestamp"
+      "time_stamp_field":"@timestamp"
     }
-    console.log(data);
     var callback = function(res) {
       $("#graph svg").remove()
       if(res.length) {
@@ -331,9 +326,9 @@ const CreateJobForm = React.createClass({
     job[parameter] =value;
     var url = URLUtils.qualifyUrl("/system/indices/index_sets/"+ $(evt.target).find('option:selected').attr('id'));
     var callback = function(res) {
+      console.log(res);
       job.indexSetName = res.index_prefix;
       tmpl.setState({ job: job });
-      console.log(job.indexSetName+"*");
       SchedulesActions.getFields( job.indexSetName+"*").then(fields => {
         var arrTen = [];
         fields.map(function(k) {
@@ -350,7 +345,7 @@ const CreateJobForm = React.createClass({
     fetch('GET', url).then(callback, failCallback);
   },
   render() {
-console.log(this.props);
+
     return (
       <div>
       <Form state={this.state} onChange={state => this.setState(state)}>

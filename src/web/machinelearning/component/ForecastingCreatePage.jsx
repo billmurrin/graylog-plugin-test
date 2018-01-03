@@ -111,7 +111,7 @@ const ForecastingCreatePage = React.createClass({
     var streams = this.state.streams;
     job.jobType ="forecasting";
     job.streamName =streams[streams.findIndex(x => x.id==job.streamId)].title;
-    fetch('PUT', URLUtils.qualifyUrl( "/plugins/org.graylog.plugins.machinelearning/rules"), {job: this.state.job}).then(callback, failCallback);
+    fetch('PUT', URLUtils.qualifyUrl( "/plugins/org.graylog.plugins.machinelearning/mlJobs"), {job: this.state.job}).then(callback, failCallback);
   },
 
   _onValueChanged(event) {
@@ -120,7 +120,6 @@ const ForecastingCreatePage = React.createClass({
     const value = event.target.type === 'checkbox' ? event.target.checked : event.target.value;
     if(!job)  job = {};
     job[parameter] = value.trim();
-    console.log(job);
     this.setState({ job: job });
   },
   _showGraph() {
@@ -281,7 +280,6 @@ const ForecastingCreatePage = React.createClass({
     var callback = function(res) {
       job.indexSetName = res.index_prefix;
       tmpl.setState({ job: job });
-      console.log(job.indexSetName+"*");
       SchedulesActions.getFields( job.indexSetName+"*").then(fields => {
         var arrTen = [];
         fields.map(function(k) {

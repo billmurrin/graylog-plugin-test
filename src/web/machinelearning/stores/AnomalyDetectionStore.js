@@ -10,7 +10,7 @@ import moment from 'moment';
 
 const AnomalyDetectionStore = Reflux.createStore({
   listenables: [AnomalyDetectionActions],
-  sourceUrl: '/plugins/org.graylog.plugins.machinelearning/rules',
+  sourceUrl: '/plugins/org.graylog.plugins.machinelearning/mlJobs',
   startJoburl: '/plugins/org.graylog.plugins.machinelearning/jobaction',
   jobs: undefined,
   init() {
@@ -33,7 +33,7 @@ const AnomalyDetectionStore = Reflux.createStore({
     AnomalyDetectionActions.list.promise(promise);
   },
   deletejob(jobid){
-    var url = URLUtils.qualifyUrl("/plugins/org.graylog.plugins.machinelearning/rules/"+jobid);
+    var url = URLUtils.qualifyUrl("/plugins/org.graylog.plugins.machinelearning/mlJobs/"+jobid);
     const promise = fetch('DELETE', url)
       .then(
         response => {
@@ -47,7 +47,7 @@ const AnomalyDetectionStore = Reflux.createStore({
   },
   startStreaming(jobid){
     console.log("startStreaming");
-    var url = URLUtils.qualifyUrl("/plugins/org.graylog.plugins.machinelearning/rules/update/"+jobid);
+    var url = URLUtils.qualifyUrl("/plugins/org.graylog.plugins.machinelearning/mlJobs/update/"+jobid);
     const promise = fetch('POST', url)
       .then(
         response => {

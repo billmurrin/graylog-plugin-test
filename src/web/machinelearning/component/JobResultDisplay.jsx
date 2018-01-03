@@ -18,12 +18,9 @@ import BootstrapModalForm from 'components/bootstrap/BootstrapModalForm';
 import Input from 'components/bootstrap/Input';
 import moment from 'moment';
 import { DataTable } from 'components/common';
-import UserNotification from 'util/UserNotification';
 import URLUtils from 'util/URLUtils';
 import Reflux from 'reflux';
 import StoreProvider from 'injection/StoreProvider';
-const StreamsStore = StoreProvider.getStore('Streams');
-const CurrentUserStore = StoreProvider.getStore('CurrentUser');
 import CombinedProvider from 'injection/CombinedProvider';
 const { AlertNotificationsStore } = CombinedProvider.get('AlertNotifications');
 import AnomalyDetectionActions from 'machinelearning/actions/AnomalyDetectionActions';
@@ -35,9 +32,7 @@ import  data from './data.json'
 
 const JobResultDisplay = React.createClass({
   componentDidMount(){
-    console.log("componentDidMount");
     let tmpl = this;
-    console.log(tmpl.props , "componentDidMount props ");
     AnomalyDetectionActions.list("anomaly").then(jobs => {
       tmpl.setState({jobs: jobs})
       tmpl.createInteractiveGraph()
