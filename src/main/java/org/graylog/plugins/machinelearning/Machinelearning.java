@@ -167,7 +167,7 @@ public class Machinelearning extends Periodical {
 
 	@Override
 	public int getPeriodSeconds() {
-		return 60;
+		return 300000;
 	}
 
 

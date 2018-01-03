@@ -1,6 +1,5 @@
 import React from 'react';
 import $ from 'jquery';
-import MachinelearningActions from 'machinelearning/MachinelearningActions';
 import JobsDisplay from './JobsDisplay';
 import Reflux from 'reflux';
 import { IfPermitted, PageHeader } from 'components/common';

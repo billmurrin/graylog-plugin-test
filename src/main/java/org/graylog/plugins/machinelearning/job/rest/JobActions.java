@@ -18,7 +18,13 @@ import org.graylog.plugins.machinelearning.job.Rule;
 import org.graylog.plugins.machinelearning.job.rest.models.JobConfiguration;
 import org.graylog.plugins.machinelearning.job.rest.models.StartJobConfiguration;
 import org.graylog2.Configuration;
+import org.graylog2.configuration.ElasticsearchClientConfiguration;
+import org.graylog2.indexer.IndexSetRegistry;
+import org.graylog2.indexer.IndexSetStatsCreator;
+import org.graylog2.indexer.IndexSetValidator;
 import org.graylog2.indexer.cluster.Cluster;
+import org.graylog2.indexer.indexset.IndexSetService;
+import org.graylog2.indexer.indices.jobs.IndexSetCleanupJob;
 import org.graylog2.indexer.results.SearchResult;
 import org.graylog2.indexer.results.TermsResult;
 import org.graylog2.indexer.searches.Searches;
@@ -30,6 +36,7 @@ import org.graylog2.plugin.indexer.searches.timeranges.RelativeRange;
 import org.graylog2.plugin.rest.PluginRestResource;
 import org.graylog2.shared.initializers.JerseyService;
 import org.graylog2.shared.rest.resources.RestResource;
+import org.graylog2.system.jobs.SystemJobManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,8 +56,10 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
+import static java.util.Objects.requireNonNull;
 import static org.joda.time.DateTimeZone.UTC;
 
 @Api(value = "Machinelearning", description = " Machinelearning rest service.")
@@ -59,6 +68,13 @@ import static org.joda.time.DateTimeZone.UTC;
 @Produces(MediaType.APPLICATION_JSON)
 public class JobActions extends RestResource implements PluginRestResource {
     private static final Logger LOG = LoggerFactory.getLogger(JobServiceImpl.class);
+    private final ElasticsearchClientConfiguration elasticConfiguration;
+
+    @Inject
+    public JobActions(final  ElasticsearchClientConfiguration  elasticConfiguration) {
+        this.elasticConfiguration= elasticConfiguration;
+    }
+
 
     @POST
     @Timed
@@ -73,30 +89,33 @@ public class JobActions extends RestResource implements PluginRestResource {
             @Valid @NotNull StartJobConfiguration obj
     ){
         try {
-
+            final List<String> hosts = elasticConfiguration.getElasticsearchHosts().stream()
+                    .map(hostUri -> {
+                        return hostUri.toString();
+                    })
+                    .collect(Collectors.toList());
             JSONObject json = new JSONObject();
-            json.put("host_ip", obj.hostIp());
             json.put("jobid", obj.jobId());
             json.put("aggregationType", obj.aggregationType());
             json.put("field", obj.field());
-            json.put("startDate" , obj.startDate());
-            json.put("endDate" , obj.endDate());
-            json.put("bucketSpan" , obj.bucketSpan());
+            json.put("elastic_url", hosts.get(0));
+
             json.put("indexSetName" , obj.indexSetName());
             json.put("sourceindextype" , obj.sourceindextype());
+
+            json.put("bucketSpan" , obj.bucketSpan());
             json.put("timestampfield" , obj.timestampfield());
-            json.put("anom_index" , obj.anomIndex());
-            json.put("anom_type" , obj.anomType());
+            json.put("max_docs" , obj.maxDocs());
             json.put("anomaly_direction" , obj.anomalyDirection() );
             json.put("max_ratio_of_anomaly" , obj.maxRatioOfAnomaly());
             json.put("alpha_parameter" , obj.alphaParameter());
-            json.put("host_port" , obj.hostPort());
-            json.put("max_docs" , obj.maxDocs());
-            json.put("streaming" , obj.streaming());
+            json.put("gelf_url", "localhost:12201/gelf");
+            json.put("streaming" , "F");
+            json.put("query" , obj.query());
+
             CloseableHttpClient httpClient = HttpClientBuilder.create().build();
+            System.out.println(json.toJSONString().toString()+ "json string");
 
-
-            LOG.info("json object"+ json.toJSONString());
             try {
                 HttpPost request = new HttpPost("http://localhost:8004/ocpu/library/smartthink/R/smartanomaly/json");
                 StringEntity params = new StringEntity(json.toString());
@@ -105,22 +124,20 @@ public class JobActions extends RestResource implements PluginRestResource {
                 HttpResponse result = httpClient.execute(request);
 
                 String json1 = EntityUtils.toString(result.getEntity(), "UTF-8");
-
-                if (result.getStatusLine().getStatusCode()!= 200) {
-                    return Response.status(result.getStatusLine().getStatusCode()).build();
-//                    throw new RuntimeException("Failed : HTTP error code : "
-//                            + result.getStatusLine().getStatusCode() + " --message--"+ json1);
+                if (result.getStatusLine().getStatusCode()== 201) {
+                    JSONObject resp = new JSONObject();
+                    resp.put("message", json1);
+                    resp.put("stausCode", result.getStatusLine().getStatusCode());
+                    return Response.accepted(resp).build();
                 }
-                Response.status(result.getStatusLine().getStatusCode()).build();
-                BufferedReader br = new BufferedReader( new InputStreamReader((result.getEntity().getContent())));
-                String output;
-                while ((output = br.readLine()) != null) {
-                    return Response.accepted(output).build();
+                else {
+                    JSONObject resp = new JSONObject();
+                    resp.put("message", json1);
+                    resp.put("errorcode", result.getStatusLine().getStatusCode());
+                    return Response.accepted(resp).build();
                 }
-                return Response.serverError().build();
 
             } catch (Exception ex) {
-                ex.printStackTrace();
                 return Response.serverError().build();
             } finally {
                 httpClient.close();

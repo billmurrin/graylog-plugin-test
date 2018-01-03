@@ -6,7 +6,6 @@ import { Row, Col, Button } from 'react-bootstrap';
 import {FormGroup, ControlLabel, FormControl} from 'react-bootstrap';
 import { LinkContainer } from 'react-router-bootstrap';
 import AggregatesActions from 'machinelearning/AggregatesActions';
-import MachinelearningActions from 'machinelearning/MachinelearningActions';
 // import StreamSelactBox from './StreamSelac
 import { IfPermitted, PageHeader } from 'components/common';
 import fetch from 'logic/rest/FetchProvider';

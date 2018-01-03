@@ -6,10 +6,7 @@ import { Row, Col, Button } from 'react-bootstrap';
 import {FormGroup, ControlLabel, FormControl} from 'react-bootstrap';
 import { LinkContainer } from 'react-router-bootstrap';
 import AggregatesActions from './AggregatesActions';
-import MachinelearningActions from './MachinelearningActions';
 // import StreamSelactBox from './StreamSelactBox';
-import RulesList from './RulesList';
-import EditRuleModal from './EditRuleModal';
 import { IfPermitted, PageHeader } from 'components/common';
 import fetch from 'logic/rest/FetchProvider';
 import { BootstrapTable, TableHeaderColumn } from 'react-bootstrap-table';
@@ -25,7 +22,6 @@ import UserNotification from 'util/UserNotification';
 import URLUtils from 'util/URLUtils';
 
 import Reflux from 'reflux';
-import AggregatesStore from './AggregatesStore';
 
 
 import StoreProvider from 'injection/StoreProvider';
@@ -48,7 +44,6 @@ var chartOptions = {
 
 // var client = ElasticSearch;
 const MachineLearningPage = React.createClass({
-  mixins: [Reflux.connect(CurrentUserStore), Reflux.connect(AggregatesStore), Reflux.connect(AlertNotificationsStore)],
   componentDidMount(){
     let tmpl = this;
     AggregatesActions.getJobs().then(jobs => {
@@ -198,7 +193,7 @@ const MachineLearningPage = React.createClass({
     tmpl.setState({showJobDetails:true})
     tmpl.setState({currentJobId:evt.currentTarget.id})
   },
- 
+
   _deletejob(evt){
     let tmpl = this;
     if (window.confirm(`Do you really want to delete job`)) {

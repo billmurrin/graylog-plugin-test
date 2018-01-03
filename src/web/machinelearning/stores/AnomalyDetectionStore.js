@@ -11,6 +11,7 @@ import moment from 'moment';
 const AnomalyDetectionStore = Reflux.createStore({
   listenables: [AnomalyDetectionActions],
   sourceUrl: '/plugins/org.graylog.plugins.machinelearning/rules',
+  startJoburl: '/plugins/org.graylog.plugins.machinelearning/jobaction',
   jobs: undefined,
   init() {
     this.trigger({ jobs: this.jobs });
@@ -57,6 +58,19 @@ const AnomalyDetectionStore = Reflux.createStore({
           UserNotification.error('starting Streaming failed ');
         });
     AnomalyDetectionActions.startStreaming.promise(promise);
+  },
+  startJob(obj){
+    const promise = fetch('POST', URLUtils.qualifyUrl(this.startJoburl), obj)
+      .then(
+        response => {
+          this.response = response
+          this.trigger({ response: response });
+          return this.response;
+        },
+        error => {
+          UserNotification.error("starting job failed   ");
+        });
+    AnomalyDetectionActions.startJob.promise(promise);
   },
 });
 

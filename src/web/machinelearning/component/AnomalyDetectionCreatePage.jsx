@@ -1,6 +1,5 @@
 import React from 'react';
 import $ from 'jquery';
-import MachinelearningActions from 'machinelearning/MachinelearningActions';
 import SchedulesActions from 'machinelearning/SchedulesActions';
 import Reflux from 'reflux';
 import { IfPermitted, PageHeader } from 'components/common';
@@ -17,7 +16,6 @@ import fetch from 'logic/rest/FetchProvider';
 import * as d3 from "d3";
 import "./style.css"
 import { Line } from "react-chartjs";
-import AggregatesActions from 'machinelearning/AggregatesActions';
 import UserNotification from 'util/UserNotification';
 import { browserHistory } from 'react-router';
 

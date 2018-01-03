@@ -5,7 +5,6 @@ import JobsDisplay from './JobsDisplay';
 import Reflux from 'reflux';
 import { IfPermitted, PageHeader } from 'components/common';
 import { Row, Col, Button, ButtonToolbar} from 'react-bootstrap';
-import AggregatesActions from 'machinelearning/AggregatesActions';
 import AnomalyDetectionStore from 'machinelearning/stores/AnomalyDetectionStore';
 import AnomalyDetectionActions from 'machinelearning/actions/AnomalyDetectionActions';
 import { LinkContainer } from 'react-router-bootstrap';
