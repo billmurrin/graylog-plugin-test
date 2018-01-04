@@ -142,7 +142,6 @@ public class JobActions extends RestResource implements PluginRestResource {
 
             } catch (Exception ex) {
                 ex.printStackTrace();
-                LOG.info(ex.printStackTrace());
                 return Response.serverError().build();
             } finally {
                 httpClient.close();
