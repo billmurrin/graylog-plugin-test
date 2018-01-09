@@ -6,7 +6,7 @@ import SchedulesActions from './SchedulesActions';
 
 const SchedulesStore = Reflux.createStore({
   listenables: [SchedulesActions],
-  sourceUrl: '/plugins/org.graylog.plugins.machinelearning/jobs/fields',
+  sourceUrl: '/plugins/org.graylog.plugins.analytics/jobs/fields',
   fields: undefined,
 
   init() {
