@@ -39,7 +39,7 @@ const ForecastingPage = React.createClass({
                 You can learn more about the Forecast  in the{' '}
               </span>
               <span>
-                <LinkContainer to={"/machineLearning/forecasting/createjob"}>
+                <LinkContainer to={"/analytics/forecasting/createjob"}>
                   <Button className="buttonColor buttonBg" >Create Job </Button>
                 </LinkContainer>
               </span>

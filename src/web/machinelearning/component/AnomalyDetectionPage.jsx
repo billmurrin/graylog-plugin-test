@@ -7,6 +7,9 @@ import { Row, Col, Button, ButtonToolbar} from 'react-bootstrap';
 import AnomalyDetectionStore from 'machinelearning/stores/AnomalyDetectionStore';
 import AnomalyDetectionActions from 'machinelearning/actions/AnomalyDetectionActions';
 import { LinkContainer } from 'react-router-bootstrap';
+
+
+
 const AnomalyDetectionPage = React.createClass({
   componentDidMount(){
     let tmpl = this;
@@ -36,7 +39,7 @@ const AnomalyDetectionPage = React.createClass({
                 You can learn more about the Anomaly Detection  in the{' '}
               </span>
               <span>
-                <LinkContainer to={"/machineLearning/anomaly/createjob"}>
+                <LinkContainer to={"/analytics/anomaly/createjob"}>
                   <Button className="buttonColor buttonBg" >Create Job </Button>
                 </LinkContainer>
               </span>

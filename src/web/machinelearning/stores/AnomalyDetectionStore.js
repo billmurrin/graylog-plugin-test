@@ -9,7 +9,7 @@ import AnomalyDetectionActions from 'machinelearning/actions/AnomalyDetectionAct
 const AnomalyDetectionStore = Reflux.createStore({
   listenables: [AnomalyDetectionActions],
   sourceUrl: '/plugins/org.graylog.plugins.machinelearning/mlJobs',
-  startJoburl: '/plugins/org.graylog.plugins.machinelearning/jobaction',
+  startJoburl: '/plugins/org.graylog.plugins.machinelearning/startjob/anomaly',
   jobs: undefined,
   init() {
     this.trigger({ jobs: this.jobs });

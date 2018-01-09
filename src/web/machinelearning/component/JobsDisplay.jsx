@@ -30,11 +30,11 @@ import * as d3 from "d3";
 import "./style.css"
 import { RingLoader } from 'react-spinners';
 
-
 const JobsDisplay = React.createClass({
   componentDidMount(){
-    console.log("componentDidMount");
+    console.log("componentDidMount", this.props);
     let tmpl = this;
+
     AnomalyDetectionActions.list("anomaly").then(jobs => {
       tmpl.setState({jobs: jobs})
     });
@@ -46,7 +46,9 @@ const JobsDisplay = React.createClass({
   },
   _ruleInfoFormatter(job) {
     const view = (
-      <i className="fa fa-table fa-2x"  onClick={this._viewjob} id={job.jobid}  title="view job"></i>
+      <LinkContainer to={"/analytics/anomaly/jobresults/"+job.jobid}>
+        <i className="fa fa-table fa-2x"  onClick={this._viewjob} id={job.jobid}  title="view job"></i>
+      </LinkContainer>
     );
     var start = null;
       if(job.loading) {
@@ -131,8 +133,43 @@ _startStreaming(evt){
 },
  _viewjob(evt) {
   //  this.createInteractiveGraph();
-   this.setState({viewGraphContent: true })
-   this.setState({currentJobId:evt.currentTarget.id})
+  let tmpl = this;
+  var index = tmpl.state.jobs.findIndex(x => x.jobid==evt.currentTarget.id);
+  console.log(index, "index*********");
+  tmpl.setState({currentJob:tmpl.state.jobs[index]})
+  var url = URLUtils.qualifyUrl("/plugins/org.graylog.plugins.machinelearning/getjobdetails/anomaly/"+evt.currentTarget.id);
+
+  fetch('POST', url)
+    .then(
+      response => {
+        var data = [];
+        var anoms = [];
+        response.hits.hits.map(function(hits) {
+            data.push({
+                date:hits._source.timestamp,
+                value:hits._source.actual_value,
+
+                })
+                if(hits._source.isAnomaly) {
+                    anoms.push({
+                      date:hits._source.timestamp,
+                      value:hits._source.actual_value,
+                      isAnomaly:hits._source.isAnomaly,
+                      expectedValue:hits._source.expected_value,
+                      deviation:hits._source.deviation,
+                      anomalyCategory:hits._source.anomaly_category,
+                    })
+                }
+
+        })
+        tmpl.setState({graphData: data})
+        tmpl.setState({anomData: anoms})
+        tmpl.setState({viewGraphContent: true })
+      },
+      error => {
+        // UserNotification.error('deleting job failed');
+      });
+
 },
  _startjob(evt) {
    let tmpl = this;
@@ -195,7 +232,12 @@ _startStreaming(evt){
       );
 
       if(tmpl.state.viewGraphContent) {
-        jobResult=<JobResultDisplay jobid={tmpl.state.currentJobId}/>
+        if(this.state.graphData.length) {
+
+          jobResult=<JobResultDisplay anoms={this.state.anomData} data={this.state.graphData} currentJob={tmpl.state.currentJob}/>
+        }else {
+          jobResult= <div>No data</div>
+        }
       }
         return (
             <div>

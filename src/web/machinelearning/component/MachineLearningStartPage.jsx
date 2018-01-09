@@ -26,10 +26,10 @@ const MachineLearningStartPage = React.createClass({
     let tmpl = this;
     let jobTabs = [];
       [ {code: "anomaly", name: "Anomaly Detection", "text" : "Detect anomalies in a numeric time-series metric over a period of time"},
-        {code: "forecasting", name: "Forecasting", text: "Forecast the future values of any time-series metric with seasonal and trending nature"}
+        {code: "forecasting", name: "Forecasting", text: "Forecast the future values of any time-series metric with seasonal and trending nature"},
       ].map(function(j) {
         jobTabs.push(
-          <LinkContainer to={"/machineLearning/"+j.code}>
+          <LinkContainer to={"/analytics/"+j.code}>
             <div  className="col-md-6" >
                 <Button bsStyle="primary" bsSize="large" block>
                     <Row>
@@ -47,9 +47,9 @@ const MachineLearningStartPage = React.createClass({
     })
       return (
         <span>
-            <PageHeader title="Machine Learning">
+            <PageHeader title="Analytics">
               <span>
-                Leverage SmartThink’s out-of-the-box machine learning algorithms to solve complex problems
+                Leverage SmartThink’s out-of-the-box Analytics algorithms to solve complex problems
               </span>
             </PageHeader>
             <PageHeader>

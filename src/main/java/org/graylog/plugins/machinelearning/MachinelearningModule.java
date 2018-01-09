@@ -2,9 +2,7 @@ package org.graylog.plugins.machinelearning;
 
 import org.graylog.plugins.machinelearning.job.JobService;
 import org.graylog.plugins.machinelearning.job.JobServiceImpl;
-import org.graylog.plugins.machinelearning.job.rest.JobActions;
-import org.graylog.plugins.machinelearning.job.rest.JobResource;
-import org.graylog.plugins.machinelearning.job.rest.MlJobResource ;
+import org.graylog.plugins.machinelearning.job.rest.*;
 import org.graylog2.plugin.PluginConfigBean;
 import org.graylog2.plugin.PluginModule;
 
@@ -45,7 +43,9 @@ public class MachinelearningModule extends PluginModule {
             addRestResource(MlJobResource.class);
             addRestResource(JobActions.class);
             addRestResource(JobResource.class);
-//        addRestResource(ReportScheduleResource.class);
+            addRestResource(AnomalyJob.class);
+            addRestResource(AnomalyDetails.class);
+            //        addRestResource(ReportScheduleResource.class);
         //addRestResource(TestRest.class);
 
         //addAlertCondition(AggregatesUtil.ALERT_CONDITION_TYPE, AggregatesAlertCondition.class, AggregatesAlertCondition.Factory.class);

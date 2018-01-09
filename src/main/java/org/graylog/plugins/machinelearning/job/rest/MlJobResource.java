@@ -49,7 +49,6 @@ public class MlJobResource extends RestResource implements PluginRestResource {
     public JobList list(
             @ApiParam(name = "JSON body", required = true) @Valid @NotNull JobsTypeConfiguration request
     ) {
-        System.out.println(request.jobType()+ "TYpe");
         final List<Job> jobs = jobService.all(request.jobType());
         return JobList.create(jobs);
     }

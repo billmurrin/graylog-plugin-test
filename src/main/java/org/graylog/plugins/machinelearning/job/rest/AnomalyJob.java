@@ -1,8 +1,13 @@
 package org.graylog.plugins.machinelearning.job.rest;
 
-
-import com.codahale.metrics.annotation.Timed;
-import com.fasterxml.jackson.databind.JsonNode;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
+import com.mongodb.MongoException;
+import io.searchbox.client.JestClient;
+import io.searchbox.core.Search;
+import io.searchbox.core.search.aggregation.FilterAggregation;
+import io.searchbox.core.search.aggregation.StatsAggregation;
+import io.searchbox.params.SearchType;
 import io.swagger.annotations.*;
 import net.minidev.json.JSONObject;
 import org.apache.http.HttpResponse;
@@ -12,31 +17,26 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
-import org.graylog.plugins.machinelearning.Machinelearning;
+import org.elasticsearch.index.query.QueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.search.aggregations.AggregationBuilders;
+import org.elasticsearch.search.aggregations.bucket.filter.FilterAggregationBuilder;
+import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramBuilder;
+import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramInterval;
+import org.elasticsearch.search.aggregations.bucket.histogram.Histogram;
 import org.graylog.plugins.machinelearning.job.JobServiceImpl;
-import org.graylog.plugins.machinelearning.job.Rule;
+import org.graylog.plugins.machinelearning.job.rest.models.GraphConfigurations;
 import org.graylog.plugins.machinelearning.job.rest.models.JobConfiguration;
 import org.graylog.plugins.machinelearning.job.rest.models.StartJobConfiguration;
 import org.graylog2.Configuration;
 import org.graylog2.configuration.ElasticsearchClientConfiguration;
-import org.graylog2.indexer.IndexSetRegistry;
-import org.graylog2.indexer.IndexSetStatsCreator;
-import org.graylog2.indexer.IndexSetValidator;
-import org.graylog2.indexer.cluster.Cluster;
-import org.graylog2.indexer.indexset.IndexSetService;
-import org.graylog2.indexer.indices.jobs.IndexSetCleanupJob;
-import org.graylog2.indexer.results.SearchResult;
-import org.graylog2.indexer.results.TermsResult;
+import org.graylog2.indexer.ElasticsearchException;
+import org.graylog2.indexer.cluster.jest.JestUtils;
+import org.graylog2.indexer.results.ResultMessage;
 import org.graylog2.indexer.searches.Searches;
-import org.graylog2.indexer.searches.SearchesConfig;
-import org.graylog2.indexer.searches.Sorting;
-import org.graylog2.plugin.cluster.ClusterConfigService;
-import org.graylog2.plugin.indexer.searches.timeranges.AbsoluteRange;
-import org.graylog2.plugin.indexer.searches.timeranges.RelativeRange;
+import org.graylog2.plugin.Message;
 import org.graylog2.plugin.rest.PluginRestResource;
-import org.graylog2.shared.initializers.JerseyService;
 import org.graylog2.shared.rest.resources.RestResource;
-import org.graylog2.system.jobs.SystemJobManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,45 +46,42 @@ import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.net.URI;
-import java.net.URL;
-import java.net.URLEncoder;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
+import java.io.UnsupportedEncodingException;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
-import static com.google.common.base.Strings.isNullOrEmpty;
-import static java.util.Objects.requireNonNull;
-import static org.joda.time.DateTimeZone.UTC;
+import static org.elasticsearch.index.query.QueryBuilders.matchAllQuery;
+import static org.elasticsearch.index.query.QueryBuilders.queryStringQuery;
+import static org.elasticsearch.search.builder.SearchSourceBuilder.searchSource;
 
-@Api(value = "Machinelearning", description = " Machinelearning rest service.")
-    @Path("/jobaction")
-@Consumes(MediaType.APPLICATION_JSON)
+@Api(value = "Machinelearning", description = " Machinelearning rest service for AnomalyJobs")
+@Path("/startjob")
 @Produces(MediaType.APPLICATION_JSON)
-public class JobActions extends RestResource implements PluginRestResource {
+public class AnomalyJob extends RestResource implements PluginRestResource {
+    private final Configuration conf;
+    private final JestClient jestClient;
     private static final Logger LOG = LoggerFactory.getLogger(JobServiceImpl.class);
     private final ElasticsearchClientConfiguration elasticConfiguration;
 
+
     @Inject
-    public JobActions(final  ElasticsearchClientConfiguration  elasticConfiguration) {
+    public AnomalyJob(final  ElasticsearchClientConfiguration  elasticConfiguration, Configuration conf, JestClient jestClient) {
+        this.conf= conf;
+        this.jestClient = jestClient;
         this.elasticConfiguration= elasticConfiguration;
     }
 
 
-    @POST
-    @Timed
-    @RequiresAuthentication
-    @ApiOperation(value = "Start a job")
-    @ApiResponses(value = {
-            @ApiResponse(code = 400, message = "The supplied request is not valid.")
-    })
 
+    @POST
+    @Path("/anomaly")
+    @RequiresAuthentication
+    @ApiOperation(value = "start anomaly jobs")
+    @ApiResponses(value = {
+            @ApiResponse(code = 404, message = "job not found."),
+    })
     public Response startJob(
             @ApiParam(name = "JSON body", required = true)
             @Valid @NotNull StartJobConfiguration obj
