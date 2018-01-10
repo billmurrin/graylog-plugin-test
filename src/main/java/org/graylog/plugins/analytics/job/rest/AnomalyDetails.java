@@ -57,7 +57,7 @@ public class AnomalyDetails extends RestResource implements PluginRestResource {
                                       @PathParam("jobid") String jobid){
         try {
 
-            String query= "jobid:"+"metricbeat3";
+            String query= "jobid:"+jobid;
 
             if (query == null || query.trim().isEmpty()) {
                 query = "*";

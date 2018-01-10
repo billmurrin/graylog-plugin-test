@@ -84,9 +84,7 @@ public class JobActions extends RestResource implements PluginRestResource {
             json.put("query" , obj.query());
 
             CloseableHttpClient httpClient = HttpClientBuilder.create().build();
-            System.out.println(json.toJSONString().toString()+ "json string");
-            LOG.info(json.toJSONString().toString()+ "data");
-            LOG.debug(json.toJSONString().toString()+ "data");
+//            LOG.info(json.toJSONString().toString()+ "data");
 
             try {
                 HttpPost request = new HttpPost("http://localhost:8004/ocpu/library/smartthink/R/smartanomaly/json");

@@ -36,7 +36,6 @@ const JobResultDisplay = React.createClass({
     AnomalyDetectionActions.list("anomaly").then(jobs => {
       tmpl.setState({jobs: jobs})
       var index = tmpl.state.jobs.findIndex(x => x.jobid==this.props.params.jobid);
-      console.log(index, "index*********");
       tmpl.setState({currentJob:tmpl.state.jobs[index]})
       var url = URLUtils.qualifyUrl("/plugins/org.graylog.plugins.analytics/getjobdetails/anomaly/"+this.props.params.jobid);
 
@@ -92,8 +91,8 @@ createInteractiveGraph() {
 
 
     var svg = d3.select("svg"),
-    margin = {top: 20, right: 20, bottom: 110, left: 40},
-    margin2 = {top: 430, right: 20, bottom: 30, left: 40},
+    margin = {top: 20, right: 20, bottom: 110, left: 80},
+    margin2 = {top: 430, right: 20, bottom: 30, left: 80},
     width = +svg.attr("width") - margin.left - margin.right,
     height = +svg.attr("height") - margin.top - margin.bottom,
     height2 = +svg.attr("height") - margin2.top - margin2.bottom;
@@ -144,6 +143,12 @@ svg.append("defs").append("clipPath")
     .append("rect")
     .attr("width", width)
     .attr("height", height);
+    svg.append("rect")
+		  .attr("class", "zoom")
+		  .attr("width", width)
+		  .attr("height", height)
+		  .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+		  .call(zoom);
 
 var focus = svg.append("g")
     .attr("class", "focus")
@@ -166,8 +171,8 @@ var context = svg.append("g")
            .style("position", "absolute")
            .style("z-index", "10")
            .style("visibility", "hidden")
-             .style('pointer-events', 'all')
-           .text("a simple tooltip");
+           .attr('class', 'd3-tip')
+           .style('pointer-events', 'all');
 
 
       focus.append("path")
@@ -208,8 +213,14 @@ var context = svg.append("g")
 		  .attr("cx", function(d) { return x(d.date) })
 		  .attr("cy", function(d) { return y(d.value); })
       .on("mouseover", function(d){
+        var html = "<strong>Expected:</strong> <span style='color:red'>" + d.expectedValue + "</span> </br>"
+              +"<strong>Actual:</strong> <span style='color:red'>" + d.value + "</span> </br>"
+              +"<strong>Deviation (%):</strong> <span style='color:red'>" + d.deviation + "</span> </br>"
+              +"<strong>Category:</strong> <span style='color:red'>" + d.anomalyCategory + "</span> </br>";
+
+// Expected value is: "+d.expectedValue + "<br/>"  + "value : "+d.value +"<br/>"  + "deviation is: "+d.deviation +"<br/>" + "Anomaly Category is: "+d.anomalyCategory
           return tooltip.style("visibility", "visible")
-                .html("Expected value is: "+d.expectedValue + "<br/>"  + "value : "+d.value +"<br/>"  + "deviation is: "+d.deviation +"<br/>" + "Anomaly Category is: "+d.anomalyCategory)
+                .html(html  )
         })
         .on("mousemove", function(){return tooltip.style("top", (event.pageY-10)+"px").style("left",(event.pageX+10)+"px");})
         .on("mouseout", function(){return tooltip.style("visibility", "hidden");});
@@ -237,12 +248,7 @@ var context = svg.append("g")
   context.append("g").attr("class", "brush").call(brush).call(brush.move, x.range());
 
 
-	  svg.append("rect")
-		  .attr("class", "zoom")
-		  .attr("width", width)
-		  .attr("height", height)
-		  .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
-		  .call(zoom);
+
 }
 
 
@@ -287,17 +293,101 @@ function type(d) {
 }
 update();
 },
+_headerCellFormatter(header) {
+  let formattedHeaderCell;
 
+  switch (header.toLocaleLowerCase()) {
+    case '':
+    formattedHeaderCell = <th className="user-type">{header}</th>;
+    break;
+    case 'actions':
+    formattedHeaderCell = <th className="actions">{header}</th>;
+    break;
+    default:
+    formattedHeaderCell = <th>{header}</th>;
+  }
+
+  return formattedHeaderCell;
+},
+_ruleInfoFormatter(anom) {
+console.log(anom);
+let deviationTxt = null;
+var deviationtotal =Math.round(anom.deviation/anom.count * 100) / 100 ;
+
+if(deviationtotal> 0) {
+  deviationTxt = (
+    <div>
+      {deviationtotal} &ensp;
+      <i className="fa fa-long-arrow-up" aria-hidden="true"></i>
+    </div>
+  )
+}
+else {
+  deviationTxt = (
+    <div>
+      {deviationtotal} &ensp;
+      <i className="fa fa-long-arrow-down" aria-hidden="true"></i>
+    </div>
+  )
+
+}
+  return (
+    <tr key={""}>
+    <td className="limited">{anom.date}</td>
+    <td className="limited">{anom.count}</td>
+    <td className="limited">
+      <strong> C :{anom.catogory.C} </strong>
+      <strong> W :{anom.catogory.W} </strong>
+      <strong> I :{anom.catogory.I} </strong>
+    </td>
+    <td className="limited">
+      {deviationTxt}
+    </td>
+    </tr>
+
+  );
+},
   render() {
+    console.log(this.state.anomData);
+    console.log(moment);
+    var data = [];
+    (this.state.anomData || []  ).map(function(a) {
+      var index = data.findIndex(x => x.date==moment(a.date).format("MM-DD-YYYY"));
+      if(index == -1) {
+      console.log(a)
+      var catogory = { I:0, C:0, W:0 }
+      catogory[a.anomalyCategory] ++;
+      data.push({date:moment(a.date).format("MM-DD-YYYY"), count:1, catogory:catogory, deviation:a.deviation})
+      }
+      else {
+        data[index].count ++;
+        data[index].catogory[a.anomalyCategory] ++;
+      	data[index].deviation += a.deviation
+      }
+
+      })
+      console.log(data)
     if(this.state.loading) {
       return (
         <RingLoader  color={'#1ab394'} loading={true}  />
       )
     }
     else {
+      const headers = ['Date', 'Total',   'Anomaly Type', 'Deviation Avg(%)'];
       return (
         <PageHeader title={"Job details: "+this.props.params.jobid}>
-        <svg width="1200" height="500"></svg>
+          <svg width="1200" height="500"></svg>
+          <div>
+            <DataTable id="anomaly-list"
+            className="table-hover table-condensed table-striped"
+            headers={headers}
+            headerCellFormatter={this._headerCellFormatter}
+            rows={data}
+            noDataText="There are no anomaly"
+            dataRowFormatter={this._ruleInfoFormatter}
+            filterKeys={[]}
+            />
+            </div>
         </PageHeader>
       );
     }

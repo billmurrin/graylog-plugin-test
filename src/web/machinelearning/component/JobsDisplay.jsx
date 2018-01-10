@@ -135,7 +135,6 @@ _startStreaming(evt){
   //  this.createInteractiveGraph();
   let tmpl = this;
   var index = tmpl.state.jobs.findIndex(x => x.jobid==evt.currentTarget.id);
-  console.log(index, "index*********");
   tmpl.setState({currentJob:tmpl.state.jobs[index]})
   var url = URLUtils.qualifyUrl("/plugins/org.graylog.plugins.analytics/getjobdetails/anomaly/"+evt.currentTarget.id);
 
@@ -176,7 +175,8 @@ _startStreaming(evt){
    var index =tmpl.state.jobs.findIndex(x => x.jobid==evt.currentTarget.id);
    tmpl.state.jobs[index].loading = true
    var job =tmpl.state.jobs[index];
-   if(job.streaming) return UserNotification.success("This job is on streaming mode cant start it !");
+   console.log(job);
+   if(job.streaming) return UserNotification.warn("This job is on streaming mode cant start it !");
    tmpl.setState({jobs: tmpl.state.jobs});
    var obj = {
      "jobid" : job.jobid,
@@ -191,7 +191,7 @@ _startStreaming(evt){
      "anomaly_direction" : "both",
      "max_ratio_of_anomaly" : "0.02",
      "alpha_parameter" : "0.1",
-     "query" : "*"
+     "query" : job.luceneQuery
    }
    AnomalyDetectionActions.startJob(obj).then(response => {
      tmpl.state.jobs[index].loading = false;
