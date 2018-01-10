@@ -2,10 +2,10 @@ import Reflux from 'reflux';
 import URLUtils from 'util/URLUtils';
 import UserNotification from 'util/UserNotification';
 import fetch from 'logic/rest/FetchProvider';
-import SchedulesActions from './SchedulesActions';
+import IndexFieldsAction from 'machinelearning/actions/IndexFieldsAction';
 
-const SchedulesStore = Reflux.createStore({
-  listenables: [SchedulesActions],
+const IndexFieldsStore = Reflux.createStore({
+  listenables: [IndexFieldsAction],
   sourceUrl: '/plugins/org.graylog.plugins.analytics/jobs/fields',
   fields: undefined,
 
@@ -13,7 +13,10 @@ const SchedulesStore = Reflux.createStore({
     this.trigger({ fields: this.fields });
   },
 
-  getFields(index) {
+  getmanju(index) {
+    console.log(index);
+    console.log("in storessdfh");
+    console.log(this.sourceUrl);
     const promise = fetch('POST', URLUtils.qualifyUrl(this.sourceUrl)+"/"+index )
       .then(
         response => {
@@ -25,8 +28,8 @@ const SchedulesStore = Reflux.createStore({
           UserNotification.error(`Fetching schedules failed with status: ${error}`,
             'Could not retrieve schedules');
         });
-    SchedulesActions.getFields.promise(promise);
+    IndexFieldsAction.getFields.promise(promise);
   },
 });
 
-export default SchedulesStore;
+export default IndexFieldsStore;

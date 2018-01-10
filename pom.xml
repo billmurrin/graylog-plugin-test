@@ -10,26 +10,39 @@
         <maven>3.1</maven>
     </prerequisites>
 
-    <groupId>org.graylog.plugins.aggregates</groupId>
-    <artifactId>graylog-plugin-aggregates</artifactId>
-    <version>2.0.1-SNAPSHOT</version>
+    <parent>
+        <groupId>org.graylog.plugins</groupId>
+        <artifactId>graylog-plugin-web-parent</artifactId>
+        <version>2.2.0</version>
+        <relativePath>../smartthink2-server/graylog-plugin-parent/graylog-plugin-web-parent</relativePath>
+    </parent>
+    <!--<parent>-->
+    <!--<groupId>org.graylog2</groupId>-->
+    <!--<artifactId>graylog2-server</artifactId>-->
+    <!--<version>2.3.0-rc.2-SNAPSHOT</version>-->
+    <!--<relativePath>../smartthink2-server/graylog-plugin-parent</relativePath>-->
+    <!--</parent>-->
+
+    <groupId>org.graylog.plugins</groupId>
+    <artifactId>smartthink-plugin-analytics</artifactId>
+    <version>1.0.4</version>
     <packaging>jar</packaging>
 
     <name>${project.artifactId}</name>
-    <description>Graylog ${project.artifactId} plugin.</description>
-    <url>https://www.graylog.org</url>
+    <description>SmartThink ${project.artifactId} plugin.</description>
+    <url>https://www.microland.com</url>
 
     <developers>
         <developer>
-            <name>Christiaan van Tienhoven</name>
-            <email>c_van_tienhoven@hotmail.com</email>
+            <name>Manju</name>
+            <email>manjuanthkb@microland.com</email>
         </developer>
     </developers>
 
     <scm>
-        <connection>scm:git:git@github.com:cvtienhoven/graylog-plugin-aggregates.git</connection>
-        <developerConnection>scm:git:git@github.com:cvtienhoven/graylog-plugin-aggregates.git</developerConnection>
-        <url>https://github.com/cvtienhoven/graylog-plugin-aggregates</url>
+        <connection>scm:git:git@gitlab.com:mlsmartthink/graylog-plugin-machinelearning.git</connection>
+        <developerConnection>scm:git:git@gitlab.com:mlsmartthink/graylog-plugin-machinelearning.git</developerConnection>
+        <url>https://github.com/cvtienhoven/graylog-plugin-machinelearning</url>
         <tag>1.0.0</tag>
     </scm>
 
@@ -37,39 +50,34 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
-        <graylog.version>2.3.0-rc.1</graylog.version>
-        <graylog.plugin-dir>/usr/share/graylog-server/plugin</graylog.plugin-dir>
+        <graylog2.version>2.3.1</graylog2.version>
+         <!--<graylog2.version>2.0.0</graylog2.version>-->
+        <graylog2.plugin-dir>/usr/share/graylog-server/plugin</graylog2.plugin-dir>
     </properties>
 
     <dependencies>
         <dependency>
             <groupId>org.graylog2</groupId>
             <artifactId>graylog2-server</artifactId>
-            <version>${graylog.version}</version>
+            <version>${graylog2.version}</version>
             <scope>provided</scope>
-          </dependency>
-          <!-- dependency>
-            <groupId>org.graylog.plugins</groupId>
-            <artifactId>usage-statistics</artifactId>
-            <version>${graylog.version}</version>
-            <scope>provided</scope>
-          </dependency-->
-          <dependency>
+        </dependency>
+        <dependency>
             <groupId>com.fasterxml.jackson.dataformat</groupId>
             <artifactId>jackson-dataformat-yaml</artifactId>
             <version>2.7.4</version>
-          </dependency>
-          <dependency>
+        </dependency>
+        <dependency>
             <groupId>com.google.auto.value</groupId>
             <artifactId>auto-value</artifactId>
             <version>1.1</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
-          <groupId>junit</groupId>
-          <artifactId>junit</artifactId>
-          <version>4.12</version>
-          <scope>test</scope>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.12</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
@@ -78,25 +86,25 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-    		<groupId>org.jfree</groupId>
-    		<artifactId>jfreechart</artifactId>
-    		<version>1.0.19</version>
-		</dependency>
-		<dependency>
-    		<groupId>com.itextpdf</groupId>
-    		<artifactId>itextpdf</artifactId>
-    		<version>5.5.10</version>
-		</dependency>
+            <groupId>org.jfree</groupId>
+            <artifactId>jfreechart</artifactId>
+            <version>1.0.19</version>
+        </dependency>
+        <dependency>
+            <groupId>com.itextpdf</groupId>
+            <artifactId>itextpdf</artifactId>
+            <version>5.5.10</version>
+        </dependency>
     </dependencies>
 
     <build>
         <resources>
             <resource><directory>build</directory></resource>
             <resource>
-              <directory>src/main/resources</directory>
-              <excludes>
-                <exclude>**/*.properties</exclude>
-              </excludes>
+                <directory>src/main/resources</directory>
+                <excludes>
+                    <exclude>**/*.properties</exclude>
+                </excludes>
             </resource>
         </resources>
         <plugins>

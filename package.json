@@ -1,10 +1,10 @@
 {
-  "name": "Aggregates",
-  "version": "1.0.0-SNAPSHOT",
+  "name": "Analytics",
+  "version": "1.0.4",
   "description": "",
   "repository": {
     "type": "git",
-    "url": "cvtienhoven/graylog-plugin-aggregates"
+    "url": "https://gitlab.com/mlsmartthink/graylog-plugin-machinelearning.git"
   },
   "scripts": {
     "start": "./node_modules/.bin/webpack-dev-server",
@@ -13,16 +13,22 @@
   "keywords": [
     "graylog"
   ],
-  "author": "Christiaan van Tienhoven <c_van_tienhoven@hotmail.com>",
-  "license": "MIT",
+  "author": "Manju",
+  "license": "Private",
   "dependencies": {
     "chart.js": "^1.1.1",
+    "d3": "^4.12.0",
     "graylog-web-plugin": "file:../smartthink2-server/graylog2-web-interface/packages/graylog-web-plugin",
     "react": "^15.6.2",
+    "react-bootstrap-table": "^4.0.6",
     "react-chartjs": "^0.8.0",
+    "react-datepicker": "^0.55.0",
     "react-dom": "^15.6.2",
+    "react-easy-chart": "^0.3.0",
     "react-simple-datepicker": "^0.1.4",
-    "serialize": "^0.1.3"
+    "react-spinners": "^0.2.5",
+    "serialize": "^0.1.3",
+    "simple-react-form": "^2.0.1"
   },
   "devDependencies": {
     "graylog-web-plugin": "file:../smartthink2-server/graylog2-web-interface/packages/graylog-web-plugin"

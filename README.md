@@ -1,9 +1,9 @@
 # Aggregates Plugin for Graylog
 
-[![Build Status](https://travis-ci.org/cvtienhoven/graylog-plugin-aggregates.svg?branch=master)](https://travis-ci.org/cvtienhoven/graylog-plugin-aggregates)
+[![Build Status](https://travis-ci.org/cvtienhoven/graylog-plugin-machinelearning.svg?branch=master)](https://travis-ci.org/cvtienhoven/graylog-plugin-machinelearning)
 
 **Required Graylog version:** 2.3.0 and later - **NOT BACKWARDS COMPATIBLE WITH OLDER GRAYLOG VERSIONS**.
-For the latest version compatible with Graylog 2.2.x, use version **[1.0.1](https://github.com/cvtienhoven/graylog-plugin-aggregates/releases/tag/1.0.1)** of the plugin.
+For the latest version compatible with Graylog 2.2.x, use version **[1.0.1](https://github.com/cvtienhoven/graylog-plugin-machinelearning/releases/tag/1.0.1)** of the plugin.
 
 
 **_Note_**: When upgrading from 1.x.x to version 2.0.0 of the plugin, it's required to modify existing rules (regarding streams and alerting) and existing report schedules (regarding receivers). See the screenshots below.
@@ -24,32 +24,32 @@ This scenario is actually very useful in a security context, but with the built-
 
 **Create / edit a rule**
 
-![](https://github.com/cvtienhoven/graylog-plugin-aggregates/blob/master/images/edit_rule.png)
+![](https://github.com/cvtienhoven/graylog-plugin-machinelearning/blob/master/images/edit_rule.png)
 
 
 **Rule overview**
 
-![](https://github.com/cvtienhoven/graylog-plugin-aggregates/blob/master/images/list.png)
+![](https://github.com/cvtienhoven/graylog-plugin-machinelearning/blob/master/images/list.png)
 
 
 **Report schedule overview**
 
-![](https://github.com/cvtienhoven/graylog-plugin-aggregates/blob/master/images/schedule_list.png)
+![](https://github.com/cvtienhoven/graylog-plugin-machinelearning/blob/master/images/schedule_list.png)
 
 
 **Create / edit a report schedule**
 
-![](https://github.com/cvtienhoven/graylog-plugin-aggregates/blob/master/images/edit_schedule.png)
+![](https://github.com/cvtienhoven/graylog-plugin-machinelearning/blob/master/images/edit_schedule.png)
 
 
 **Report example**
 
-![](https://github.com/cvtienhoven/graylog-plugin-aggregates/blob/master/images/report.png)
+![](https://github.com/cvtienhoven/graylog-plugin-machinelearning/blob/master/images/report.png)
 
 Installation
 ------------
 
-[Download the plugin](https://github.com/cvtienhoven/graylog-plugin-aggregates/releases)
+[Download the plugin](https://github.com/cvtienhoven/graylog-plugin-machinelearning/releases)
 and place the `.jar` file in your Graylog plugin directory. The plugin directory
 is the `plugins/` folder relative from your `graylog-server` directory by default
 and can be configured in your `graylog.conf` file.
@@ -103,7 +103,7 @@ Since version 2.0.0, the plugin integrates tightly with the `Notifications` with
 
 In the rule overview, there's an option (checkbox) to include rule history in a report. This report is a PDF file that contains a bar chart for every rule, summing up the total number of hits for that rule per period. The grid for the chart is automatically determined based on the total amount of time. The report is tailored per alert receiver, which means that a receipient will only receive charts for the rules subscribed to.
 
-When creating or editing a rule, the schedule(s) for generating report(s) can be supplied. For configuring a schedule, you should supply a name, a valid Cron expression using the [Drools](http://javadox.com/org.drools/drools-core/6.2.0.Final/org/drools/core/time/impl/CronExpression.html) syntax and the timespan, e.g. the amount of history you wish to incorporate in the report. Since version 2.0.0 of the plugin, receivers of reports are defined on the report schedule, not on the aggregates rule anymore.
+When creating or editing a rule, the schedule(s) for generating report(s) can be supplied. For configuring a schedule, you should supply a name, a valid Cron expression using the [Drools](http://javadox.com/org.drools/drools-core/6.2.0.Final/org/drools/core/time/impl/CronExpression.html) syntax and the timespan, e.g. the amount of history you wish to incorporate in the report. Since version 2.0.0 of the plugin, receivers of reports are defined on the report schedule, not on the machinelearning rule anymore.
 
 **_Note_**: The maximum timespan determines the overall retention. So, if you have a report schedule that takes a year of history, the retention of hits will be a year. This might influence your MongoDB storage needs.
 
