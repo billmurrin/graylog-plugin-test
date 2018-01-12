@@ -9,14 +9,14 @@ import moment from 'moment';
 
 const MachinelearningStore = Reflux.createStore({
   listenables: [MachinelearningActions],
-  sourceUrl: '/plugins/org.graylog.plugins.analytics/mlJobs',
+  sourceUrl: '/plugins/org.graylog.plugins.machinelearning/mlJobs',
   init() {
     this.trigger({ jobs: this.jobs });
     //
   },
   getFields(){
     console.log("in get fields ");
-    const promise = fetch('POST', "http://localhost:9000/api/plugins/org.graylog.plugins.analytics/jobs/fields")
+    const promise = fetch('POST', "http://localhost:9000/api/plugins/org.graylog.plugins.machinelearning/jobs/fields")
       .then(
         response => {
           console.log(response);

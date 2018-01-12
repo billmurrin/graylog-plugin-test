@@ -136,7 +136,7 @@ _startStreaming(evt){
   let tmpl = this;
   var index = tmpl.state.jobs.findIndex(x => x.jobid==evt.currentTarget.id);
   tmpl.setState({currentJob:tmpl.state.jobs[index]})
-  var url = URLUtils.qualifyUrl("/plugins/org.graylog.plugins.analytics/getjobdetails/anomaly/"+evt.currentTarget.id);
+  var url = URLUtils.qualifyUrl("/plugins/org.graylog.plugins.machinelearning/getjobdetails/anomaly/"+evt.currentTarget.id);
 
   fetch('POST', url)
     .then(

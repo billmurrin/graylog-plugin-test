@@ -248,7 +248,7 @@ const MachineLearningPage = React.createClass({
            "query_size": 1212,
            "time_stamp_field":"timestamp"
          }
-  fetch('POST', "http://localhost:9000/api/plugins/org.graylog.plugins.analytics/jobs/graph/search", result).then(function(r) {
+  fetch('POST', "http://localhost:9000/api/plugins/org.graylog.plugins.machinelearning/jobs/graph/search", result).then(function(r) {
     console.log(r+ "result************8");
   }, function(er) {
     console.log(er);
@@ -265,7 +265,7 @@ const MachineLearningPage = React.createClass({
           tmpl.setState({ jobs: jobs });
         });
     }
-    fetch('PUT', URLUtils.qualifyUrl("/plugins/org.graylog.plugins.analytics/mlJobs"), {job: this.state.job}).then(callback, failCallback);
+    fetch('PUT', URLUtils.qualifyUrl("/plugins/org.graylog.plugins.machinelearning/mlJobs"), {job: this.state.job}).then(callback, failCallback);
   },
   _onDateSelected(field) {
     return (date, _, event) => {

@@ -148,7 +148,7 @@ const CreateJobForm = React.createClass({
         tmpl.setState({ jobs: jobs });
       });
     }
-    fetch('PUT', URLUtils.qualifyUrl("/plugins/org.graylog.plugins.analytics/mlJobs"), {job: this.state.job}).then(callback, failCallback);
+    fetch('PUT', URLUtils.qualifyUrl("/plugins/org.graylog.plugins.machinelearning/mlJobs"), {job: this.state.job}).then(callback, failCallback);
   },
   _rangeParamsChanged(key) {
     var job = this.state.job;
@@ -213,7 +213,7 @@ const CreateJobForm = React.createClass({
     var failCallback = function(err) {
       console.log(err);
     }
-    var url = URLUtils.qualifyUrl("/plugins/org.graylog.plugins.analytics/jobs/graph/search");
+    var url = URLUtils.qualifyUrl("/plugins/org.graylog.plugins.machinelearning/jobs/graph/search");
     fetch('POST', url, data).then(callback, failCallback);
 
   },

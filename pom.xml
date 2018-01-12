@@ -24,7 +24,7 @@
     <!--</parent>-->
 
     <groupId>org.graylog.plugins</groupId>
-    <artifactId>smartthink-plugin-analytics</artifactId>
+    <artifactId>graylog-plugin-machinelearning</artifactId>
     <version>1.0.4</version>
     <packaging>jar</packaging>
 

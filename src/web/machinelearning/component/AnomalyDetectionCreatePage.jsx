@@ -110,7 +110,7 @@ const AnomalyDetectionCreatePage = React.createClass({
     var streams = this.state.streams;
     job.jobType ="anomaly";
     job.streamName =streams[streams.findIndex(x => x.id==job.streamId)].title;
-    fetch('PUT', URLUtils.qualifyUrl("/plugins/org.graylog.plugins.analytics/mlJobs"), {job: job}).then(callback, failCallback);
+    fetch('PUT', URLUtils.qualifyUrl("/plugins/org.graylog.plugins.machinelearning/mlJobs"), {job: job}).then(callback, failCallback);
   },
 
   _onValueChanged(event) {
@@ -149,7 +149,7 @@ const AnomalyDetectionCreatePage = React.createClass({
           var failCallback = function(err) {
                 UserNotification.error(err);
           }
-            var url = URLUtils.qualifyUrl("/plugins/org.graylog.plugins.analytics/jobs/graph/search");
+            var url = URLUtils.qualifyUrl("/plugins/org.graylog.plugins.machinelearning/jobs/graph/search");
             fetch('POST', url, data).then(callback, failCallback);
         }
       catch(err) {
@@ -284,7 +284,7 @@ const AnomalyDetectionCreatePage = React.createClass({
       job.indexSetName = res.index_prefix;
       tmpl.setState({ job: job });
       console.log(SchedulesActions);
-      var url = URLUtils.qualifyUrl("/plugins/org.graylog.plugins.analytics/jobs/fields/")+ job.indexSetName+"*";
+      var url = URLUtils.qualifyUrl("/plugins/org.graylog.plugins.machinelearning/jobs/fields/")+ job.indexSetName+"*";
       console.log(url);
       fetch('POST', url )
         .then(
