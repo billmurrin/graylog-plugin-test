@@ -21,7 +21,7 @@ const MachineLearningPage = React.createClass({
         "elastic_index_name": "anomaly_result",
         }
         console.log(obj , "sending");
-    fetch('POST', URLUtils.qualifyUrl("/plugins/org.graylog.plugins.analytics/jobs/getjobDetails"), obj).then(function(resp) {
+    fetch('POST', URLUtils.qualifyUrl("/plugins/org.graylog.plugins.machinelearning/jobs/getjobDetails"), obj).then(function(resp) {
         var hits = resp.hits.hits;
         var res = [];
         var anom = [];
