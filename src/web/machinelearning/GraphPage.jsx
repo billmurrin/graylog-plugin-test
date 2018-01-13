@@ -62,7 +62,7 @@
 // }, function (err) {
 //     console.trace(err.message);
 // });
-// fetch('GET', "http://localhost:9000/api/plugins/org.graylog.plugins.machinelearning/mlJobs").then(function(x) {
+// fetch('GET', "http://localhost:9000/api/plugins/org.graylog.plugins.analytics/mlJobs").then(function(x) {
 //       tmpl.setState({jobs: x.jobs})
 //   }, function(err) {
 //     console.log(err);

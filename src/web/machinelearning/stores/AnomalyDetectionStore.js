@@ -8,8 +8,8 @@ import AnomalyDetectionActions from 'machinelearning/actions/AnomalyDetectionAct
 
 const AnomalyDetectionStore = Reflux.createStore({
   listenables: [AnomalyDetectionActions],
-  sourceUrl: '/plugins/org.graylog.plugins.machinelearning/mlJobs',
-  startJoburl: '/plugins/org.graylog.plugins.machinelearning/startjob/anomaly',
+  sourceUrl: '/plugins/org.graylog.plugins.analytics/mlJobs',
+  startJoburl: '/plugins/org.graylog.plugins.analytics/startjob/anomaly',
   jobs: undefined,
   init() {
     this.trigger({ jobs: this.jobs });
@@ -31,7 +31,7 @@ const AnomalyDetectionStore = Reflux.createStore({
     AnomalyDetectionActions.list.promise(promise);
   },
   deletejob(jobid){
-    var url = URLUtils.qualifyUrl("/plugins/org.graylog.plugins.machinelearning/mlJobs/"+jobid);
+    var url = URLUtils.qualifyUrl("/plugins/org.graylog.plugins.analytics/mlJobs/"+jobid);
     const promise = fetch('DELETE', url)
       .then(
         response => {
@@ -45,7 +45,7 @@ const AnomalyDetectionStore = Reflux.createStore({
   },
   startStreaming(jobid){
     console.log("startStreaming");
-    var url = URLUtils.qualifyUrl("/plugins/org.graylog.plugins.machinelearning/mlJobs/update/"+jobid);
+    var url = URLUtils.qualifyUrl("/plugins/org.graylog.plugins.analytics/mlJobs/update/"+jobid);
     const promise = fetch('POST', url)
       .then(
         response => {

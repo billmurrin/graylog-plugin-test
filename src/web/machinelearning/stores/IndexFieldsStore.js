@@ -6,7 +6,7 @@ import IndexFieldsAction from 'machinelearning/actions/IndexFieldsAction';
 
 const IndexFieldsStore = Reflux.createStore({
   listenables: [IndexFieldsAction],
-  sourceUrl: '/plugins/org.graylog.plugins.machinelearning/jobs/fields',
+  sourceUrl: '/plugins/org.graylog.plugins.analytics/jobs/fields',
   fields: undefined,
 
   init() {

@@ -37,7 +37,7 @@ const JobResultDisplay = React.createClass({
       tmpl.setState({jobs: jobs})
       var index = tmpl.state.jobs.findIndex(x => x.jobid==this.props.params.jobid);
       tmpl.setState({currentJob:tmpl.state.jobs[index]})
-      var url = URLUtils.qualifyUrl("/plugins/org.graylog.plugins.machinelearning/getjobdetails/anomaly/"+this.props.params.jobid);
+      var url = URLUtils.qualifyUrl("/plugins/org.graylog.plugins.analytics/getjobdetails/anomaly/"+this.props.params.jobid);
 
       fetch('POST', url)
         .then(
